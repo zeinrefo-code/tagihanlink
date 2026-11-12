@@ -1,0 +1,13 @@
+{
+  "name": "@aevum-kit/aevum",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Aevum testnet chain config, contract ABIs and helpers shared by the web app and examples.",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "peerDependencies": {
+    "viem": "^2.57.0"
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "name": "examples",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "check-setup": "tsx --env-file-if-exists=.env src/check-setup.ts",
+    "pay-gasless": "tsx --env-file-if-exists=.env src/pay-gasless.ts",
+    "read-payments": "tsx --env-file-if-exists=.env src/read-payments.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@aevum-kit/aevum": "workspace:*",
+    "viem": "2.57.12"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "tsx": "4.23.15",
+    "typescript": "5.9.3"
+  }
+}
