@@ -56,7 +56,9 @@ cp web/.env.example web/.env.local
 make dev                              # http://localhost:3000
 ```
 
-In your wallet, add a network with RPC `http://127.0.0.1:8545` and chain ID `44005` (the app's **Switch network** button does this for you).
+In your wallet, point chain ID `44005` at RPC `http://127.0.0.1:8545`. If your wallet already has Aevum saved, add the local RPC to that network and switch to it (MetaMask allows several RPCs per network); switch back to `https://rpc-test.qday.info` when you're done. Otherwise the app reads the fork while your wallet sends to the real testnet.
+
+> **Test on the fork with a fresh, empty account.** The fork has the same chain ID as the real testnet, so an approval or signature made for a fork contract is also valid on the real testnet. `make deploy-fork` deploys from a random address nobody holds the key to, so its Checkout address can't be taken over on the real testnet, but keep wallets that hold real testnet funds out of fork testing anyway.
 
 For a local relayer, any of anvil's [default test accounts](https://book.getfoundry.sh/anvil/#getting-started) works. Those keys are public: use them on local chains only.
 

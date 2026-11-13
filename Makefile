@@ -42,8 +42,17 @@ fork: ## Local copy of Aevum testnet (44005) on 127.0.0.1:8545
 deploy-local: ## Deploy MockUSD8 + Checkout to `make anvil`
 	cd contracts && forge script script/Deploy.s.sol --rpc-url $(LOCAL_RPC) --broadcast --unlocked --sender $(ANVIL_0)
 
+# The fork shares chain ID 44005 with the real testnet, so anything approved or signed for
+# a fork contract is also valid there. If we deployed from a public anvil account, the same
+# contract address could be claimed on the real testnet by anyone holding that public key.
+# Deploy from a random address nobody has the key for instead (anvil impersonates it).
 deploy-fork: ## Deploy Checkout (real tUSD8) to `make fork`
-	cd contracts && forge script script/Deploy.s.sol --rpc-url $(LOCAL_RPC) --broadcast --unlocked --sender $(ANVIL_0)
+	@test "$$(cast chain-id --rpc-url $(LOCAL_RPC))" = "44005" || (echo "This only works on 'make fork'." && exit 1)
+	@DEPLOYER=$$(cast to-check-sum-address 0x$$(openssl rand -hex 20)); \
+	  cast rpc anvil_setBalance $$DEPLOYER 0x8ac7230489e80000 --rpc-url $(LOCAL_RPC) > /dev/null && \
+	  cast rpc anvil_impersonateAccount $$DEPLOYER --rpc-url $(LOCAL_RPC) > /dev/null && \
+	  echo "Deploying from throwaway address $$DEPLOYER (no private key exists for it)" && \
+	  cd contracts && MERCHANT=$${MERCHANT:-$(ANVIL_0)} forge script script/Deploy.s.sol --rpc-url $(LOCAL_RPC) --broadcast --unlocked --sender $$DEPLOYER
 
 deploy-aevum: ## Deploy Checkout to Aevum testnet. Needs ACCOUNT=<keystore name> (see README)
 	@test -n "$(ACCOUNT)" || (echo "Set ACCOUNT=<name>. Create one with: cast wallet import <name> --interactive" && exit 1)

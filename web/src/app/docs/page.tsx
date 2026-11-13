@@ -85,6 +85,14 @@ make dev
               has Aevum saved with the public RPC, change that RPC while you test on the fork, or use a separate browser profile. Otherwise the
               app reads the fork while your wallet sends to the real testnet.
             </p>
+            <div className="notice warn">
+              <strong>Test on the fork with a fresh, empty account.</strong>
+              <span>
+                The fork has the same chain ID as the real testnet, so an approval or signature made for a fork contract is also valid on the
+                real testnet. <code>make deploy-fork</code> deploys from a random address nobody holds the key to, so its Checkout address
+                can&apos;t be taken over there, but keep wallets that hold real testnet funds out of fork testing anyway.
+              </span>
+            </div>
             <p>
               Any of anvil&apos;s default accounts works as a local relayer. Those keys are public: use them on local chains only. Want an empty
               chain instead? <code>make anvil</code> + <code>make deploy-local</code> deploys a <code>MockUSD8</code> that anyone can mint with{" "}
