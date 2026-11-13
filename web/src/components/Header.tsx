@@ -4,12 +4,13 @@ import { ConnectButton } from "@rainbow-me/rainbowkit";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useAccount, useSwitchChain } from "wagmi";
-import { appChain, repoUrl } from "@/lib/env";
+import { appChain } from "@/lib/env";
 
 const links = [
   { href: "/", label: "Setup" },
   { href: "/checkout", label: "Checkout" },
   { href: "/activity", label: "Activity" },
+  { href: "/docs", label: "Docs" },
 ];
 
 export function Header() {
@@ -35,9 +36,6 @@ export function Header() {
                 </Link>
               );
             })}
-            <a href={`${repoUrl}#readme`} target="_blank" rel="noreferrer">
-              Docs
-            </a>
           </nav>
           <div className="topbar-end">
             <ConnectButton chainStatus="icon" showBalance={false} accountStatus="address" />

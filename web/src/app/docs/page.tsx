@@ -1,0 +1,321 @@
+import type { Metadata } from "next";
+import { links, TUSD8_ADDRESS } from "@aevum-kit/aevum";
+import { repoUrl } from "@/lib/env";
+
+export const metadata: Metadata = { title: "Docs" };
+
+const sections = [
+  { id: "quickstart", label: "Quickstart" },
+  { id: "network", label: "Network details" },
+  { id: "tokens", label: "Get test tokens" },
+  { id: "deploy", label: "Deploy to Aevum" },
+  { id: "checkout", label: "How the checkout works" },
+  { id: "differences", label: "Differences from Ethereum" },
+  { id: "commands", label: "Commands" },
+  { id: "submitting", label: "Submitting your project" },
+  { id: "faq", label: "FAQ" },
+];
+
+function Code({ children }: { children: string }) {
+  return (
+    <pre className="code">
+      <code>{children.trim()}</code>
+    </pre>
+  );
+}
+
+export default function DocsPage() {
+  return (
+    <main className="shell">
+      <div className="page-head">
+        <div>
+          <p className="eyebrow">Docs</p>
+          <h1>Build on Aevum testnet</h1>
+          <p className="lede">
+            Everything in this kit, on one page: run it locally, deploy to chain 44005, and the few places where Aevum behaves differently
+            from Ethereum.
+          </p>
+        </div>
+      </div>
+
+      <div className="notice warn">
+        <strong>Judging counts activity on Aevum.</strong>
+        <span>Contracts, payments and transfers must happen on Aevum testnet. Settling only on another chain (for example x402 on Base) doesn&apos;t count.</span>
+      </div>
+
+      <div className="docs">
+        <nav className="docs-toc" aria-label="On this page">
+          <p className="docs-toc-title">On this page</p>
+          {sections.map((s) => (
+            <a key={s.id} href={`#${s.id}`}>
+              {s.label}
+            </a>
+          ))}
+        </nav>
+
+        <article className="docs-body">
+          <section id="quickstart">
+            <h2>Quickstart</h2>
+            <p>
+              Five minutes, no funds needed. You need Node 22+, pnpm and Foundry (<code>foundryup</code>).
+            </p>
+            <Code>{`
+git clone --recursive ${repoUrl}.git
+cd aevum-starter-kit
+make install          # Solidity libs + JS packages
+make check            # build, Shanghai opcode check, unit tests, fork tests
+`}</Code>
+            <p>Run the whole app against a local copy of Aevum, with the real tUSD8 and free test balances:</p>
+            <Code>{`
+# terminal 1: local fork of Aevum testnet on 127.0.0.1:8545
+make fork
+
+# terminal 2: deploy Checkout and give yourself test money
+make deploy-fork                      # prints the Checkout address
+make deal TO=<your wallet address>    # 100 tUSD8 + 10 tQDAY, on the fork only
+
+cp web/.env.example web/.env.local
+#   NEXT_PUBLIC_CHAIN=fork
+#   NEXT_PUBLIC_CHECKOUT_ADDRESS=<address from deploy-fork>
+#   RELAYER_PRIVATE_KEY=<an anvil test key>   (optional: enables gasless mode)
+make dev
+`}</Code>
+            <p>
+              In your wallet, point a network with chain ID <code>44005</code> at RPC <code>http://127.0.0.1:8545</code>. If your wallet already
+              has Aevum saved with the public RPC, change that RPC while you test on the fork, or use a separate browser profile. Otherwise the
+              app reads the fork while your wallet sends to the real testnet.
+            </p>
+            <p>
+              Any of anvil&apos;s default accounts works as a local relayer. Those keys are public: use them on local chains only. Want an empty
+              chain instead? <code>make anvil</code> + <code>make deploy-local</code> deploys a <code>MockUSD8</code> that anyone can mint with{" "}
+              <code>make mint</code>.
+            </p>
+          </section>
+
+          <section id="network">
+            <h2>Network details</h2>
+            <div className="table-wrap">
+              <table className="data docs-table">
+                <tbody>
+                  <tr><th scope="row">Network</th><td>QDay Aevum Testnet</td></tr>
+                  <tr><th scope="row">Chain ID</th><td><code>44005</code></td></tr>
+                  <tr><th scope="row">RPC</th><td><code>https://rpc-test.qday.info</code> (HTTPS only, no WebSocket)</td></tr>
+                  <tr><th scope="row">Explorer</th><td><a href={links.explorer} target="_blank" rel="noreferrer">{links.explorer.replace("https://", "")}</a></td></tr>
+                  <tr><th scope="row">Gas token</th><td>tQDAY (18 decimals), about 1 gwei. 1 tQDAY covers hundreds of contract calls.</td></tr>
+                  <tr><th scope="row">EVM version</th><td><strong>Shanghai</strong></td></tr>
+                  <tr><th scope="row">tUSD8</th><td><code className="wrap">{TUSD8_ADDRESS}</code><br />6 decimals, USDC-style: EIP-2612 <code>permit</code>, EIP-3009 signed transfers. EIP-712 domain <code>name: &quot;tUSD8&quot;</code>, <code>version: &quot;2&quot;</code>.</td></tr>
+                  <tr><th scope="row">Multicall3</th><td><code className="wrap">0xcA11bde05977b3631167028862bE2a173976CA11</code></td></tr>
+                </tbody>
+              </table>
+            </div>
+            <p>
+              All of this is exported from <code>@aevum-kit/aevum</code> (<code>packages/aevum/src/chain.ts</code> and <code>contracts.ts</code>).
+            </p>
+          </section>
+
+          <section id="tokens">
+            <h2>Get test tokens</h2>
+            <ul>
+              <li>
+                <strong>Discord faucet (Builder Challenge participants):</strong> in the QDay Discord, verify, then run{" "}
+                <code>/faucet &lt;your address&gt;</code> in <code>#faucet</code>. You get 1 tQDAY + 5 tUSD8, once per Discord account.
+              </li>
+              <li>
+                <strong>Web faucet:</strong>{" "}
+                <a href={links.faucetWeb} target="_blank" rel="noreferrer">faucet.qday.info</a>. Check the page for its rules.
+              </li>
+              <li>
+                <strong>Local fork:</strong> <code>make deal TO=&lt;address&gt;</code> for unlimited test balances. Nothing leaves your machine.
+              </li>
+            </ul>
+            <p>1 tQDAY is plenty: deploying <code>Checkout</code> costs well under 0.01 tQDAY.</p>
+          </section>
+
+          <section id="deploy">
+            <h2>Deploy to Aevum testnet</h2>
+            <p>Keep your deployer key out of files and shell history. Foundry&apos;s encrypted keystore asks for the key once and a password each time:</p>
+            <Code>{`
+cast wallet import aevum-deployer --interactive   # paste the key of a TEST wallet
+cast wallet address --account aevum-deployer      # fund this address from the faucet
+
+make deploy-aevum ACCOUNT=aevum-deployer          # MERCHANT defaults to the deployer
+MERCHANT=0x... make deploy-aevum ACCOUNT=aevum-deployer
+`}</Code>
+            <p>
+              Then set <code>NEXT_PUBLIC_CHAIN=aevum</code> and <code>NEXT_PUBLIC_CHECKOUT_ADDRESS</code> in <code>web/.env.local</code>.
+            </p>
+            <div className="notice bad">
+              <strong>Use a wallet made only for testing.</strong>
+              <span>Never paste a private key into chat, an issue, or a committed file.</span>
+            </div>
+            <p>
+              <strong>Contract verification</strong> on the explorer isn&apos;t working yet, so <code>forge verify-contract</code> fails for now.
+              Put your contract addresses and a link to the exact commit in your README and submission instead.
+            </p>
+          </section>
+
+          <section id="checkout">
+            <h2>How the checkout works</h2>
+            <p>
+              <code>Checkout</code> takes one token and one merchant address. Each <code>orderId</code> (any <code>bytes32</code>) can be paid
+              once. The money goes straight to the merchant, and the <code>Paid(orderId, payer, amount)</code> event is the receipt.
+            </p>
+            <div className="grid-2">
+              <div className="card">
+                <h3>Standard</h3>
+                <p className="sub">Two transactions. The buyer pays gas.</p>
+                <Code>{`
+buyer → approve(Checkout, amount) → tUSD8
+buyer → pay(orderId, amount)      → Checkout
+        Checkout → transferFrom   → merchant
+`}</Code>
+              </div>
+              <div className="card">
+                <h3>Gasless</h3>
+                <p className="sub">One signature. The buyer needs no tQDAY.</p>
+                <Code>{`
+buyer   signs ReceiveWithAuthorization (off-chain)
+relayer → payWithAuthorization(...) → Checkout
+          Checkout → receiveWithAuthorization
+          tUSD8 → Checkout → merchant
+`}</Code>
+              </div>
+            </div>
+            <p>Design choices worth keeping:</p>
+            <ul>
+              <li>
+                The signed <code>nonce</code> must equal <code>Checkout.authorizationNonce(orderId)</code>. That binds the signature to one order, so
+                a relayer can&apos;t reuse it to mark a different order as paid.
+              </li>
+              <li>
+                <code>receiveWithAuthorization</code> (not <code>transferWithAuthorization</code>) means only the Checkout can pull the funds, so
+                nobody can front-run the signature into a plain transfer.
+              </li>
+              <li>
+                The relayer (<code>web/src/app/api/relay/route.ts</code>) only calls <code>payWithAuthorization</code> on your Checkout, simulates
+                first, caps the signature window at 1 hour, and rate-limits per IP.
+              </li>
+              <li>
+                The contract doesn&apos;t know prices. Your app decides what an order costs and checks <code>paymentOf(orderId)</code> before
+                delivering.
+              </li>
+            </ul>
+            <p>Code to read, in order:</p>
+            <ol>
+              <li><code>contracts/src/Checkout.sol</code></li>
+              <li><code>contracts/test/Checkout.t.sol</code>: every rule above as a test</li>
+              <li><code>contracts/test/fork/AevumFork.t.sol</code>: the same flows against the real tUSD8</li>
+              <li><code>examples/src/pay-gasless.ts</code>: sign and relay in about 40 lines</li>
+              <li><code>web/src/app/checkout/page.tsx</code>: both modes in the UI</li>
+            </ol>
+          </section>
+
+          <section id="differences">
+            <h2>Differences from Ethereum</h2>
+            <div className="table-wrap">
+              <table className="data docs-table wide">
+                <thead>
+                  <tr><th>Topic</th><th>What happens</th><th>What to do</th></tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><strong>Shanghai EVM</strong></td>
+                    <td>Cancun opcodes (<code>MCOPY</code>, <code>TSTORE</code>/<code>TLOAD</code>, blob ops) don&apos;t exist. Cancun bytecode deploys, then reverts with <code>invalid opcode</code>.</td>
+                    <td>Keep <code>evm_version = &quot;shanghai&quot;</code>. <code>make build</code> runs <code>tools/check-shanghai.mjs</code>. Avoid OpenZeppelin&apos;s <code>*Transient</code> contracts.</td>
+                  </tr>
+                  <tr>
+                    <td><strong>anvil hides it</strong></td>
+                    <td>Plain <code>anvil --fork-url</code> runs Cancun, so bad bytecode passes local tests.</td>
+                    <td>Always add <code>--hardfork shanghai</code> (the Makefile does).</td>
+                  </tr>
+                  <tr>
+                    <td><strong>1,000-block log limit</strong></td>
+                    <td><code>eth_getLogs</code> over more than 1,000 blocks fails.</td>
+                    <td>Use <code>getLogsChunked</code> from <code>@aevum-kit/aevum</code>, starting from your deploy block.</td>
+                  </tr>
+                  <tr>
+                    <td><strong>No WebSocket RPC</strong></td>
+                    <td><code>watchContractEvent</code> over WS won&apos;t connect.</td>
+                    <td>Poll over HTTPS (viem&apos;s default for <code>http()</code>).</td>
+                  </tr>
+                  <tr>
+                    <td><strong>Explorer verification</strong></td>
+                    <td>Not working yet.</td>
+                    <td>Share addresses and the exact commit instead.</td>
+                  </tr>
+                  <tr>
+                    <td><strong>Legacy transactions</strong></td>
+                    <td>The kit&apos;s scripts and relayer send legacy (type 0) transactions, like QDay&apos;s own faucet.</td>
+                    <td><code>--legacy</code> in <code>forge script</code>, <code>type: &quot;legacy&quot;</code> in viem.</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+
+          <section id="commands">
+            <h2>Commands</h2>
+            <Code>{`
+make install        Fetch Solidity libs and JS packages
+make build          Compile contracts and check they are Shanghai-safe
+make test           Unit tests (local, no network)
+make test-fork      Tests against the real tUSD8 on a local fork of Aevum
+make check          Everything CI runs
+make anvil          Empty local chain (31337) with Aevum's EVM rules
+make fork           Local copy of Aevum testnet (44005) on 127.0.0.1:8545
+make deploy-local   Deploy MockUSD8 + Checkout to \`make anvil\`
+make deploy-fork    Deploy Checkout (real tUSD8) to \`make fork\`
+make deploy-aevum   Deploy Checkout to Aevum testnet (ACCOUNT=<keystore>)
+make mint           \`make anvil\` only: mint MockUSD8 (TO=, CHECKOUT=, AMOUNT=)
+make deal           \`make fork\` only: give TO tUSD8 and tQDAY
+make dev            Start the web app
+`}</Code>
+            <p>
+              Examples (copy <code>examples/.env.example</code> to <code>examples/.env</code> first):
+            </p>
+            <Code>{`
+pnpm example check-setup      # chain, block, gas price and balances of ADDRESS
+pnpm example pay-gasless      # BUYER_KEY signs, RELAYER_KEY submits
+pnpm example read-payments    # every Paid event, 1,000 blocks at a time
+`}</Code>
+          </section>
+
+          <section id="submitting">
+            <h2>Submitting your project</h2>
+            <p>Make it easy for judges to check your on-chain activity:</p>
+            <ul>
+              <li>Contract addresses on Aevum testnet (<code>44005</code>), with explorer links.</li>
+              <li>A link to the exact commit you deployed.</li>
+              <li>A few transaction hashes that show your app working. The receipt and activity pages show them.</li>
+              <li>A short demo video or a live URL.</li>
+            </ul>
+            <p>Read the official rules on the DoraHacks challenge page. They win over anything here.</p>
+          </section>
+
+          <section id="faq">
+            <h2>FAQ</h2>
+            <dl className="faq">
+              <dt>Do I have to use Checkout?</dt>
+              <dd>No. It&apos;s an example. Keep the parts you need (<code>packages/aevum</code>, the chunked log reader, the setup checker) and replace the rest.</dd>
+              <dt>Can I use account abstraction?</dt>
+              <dd>Aevum has an ERC-4337 bundler (EntryPoint v0.7) and Kernel v3.1 accounts. A smart-account example is coming to this kit.</dd>
+              <dt>Can I use Hardhat?</dt>
+              <dd>Yes. Set <code>evmVersion: &quot;shanghai&quot;</code> in the Solidity settings, and <code>hardfork: &quot;shanghai&quot;</code> for the Hardhat network.</dd>
+              <dt>My transaction fails with invalid opcode.</dt>
+              <dd>You compiled for Cancun. See <a href="#differences">Differences from Ethereum</a>.</dd>
+              <dt>eth_getLogs errors on a big range.</dt>
+              <dd>Split it into 1,000-block chunks with <code>getLogsChunked</code>.</dd>
+              <dt>Where do I ask for help?</dt>
+              <dd>In the QDay Discord&apos;s Builder Challenge channels.</dd>
+            </dl>
+          </section>
+
+          <p className="fine">
+            Source and full README: <a href={repoUrl} target="_blank" rel="noreferrer">{repoUrl.replace("https://", "")}</a>. QDay&apos;s general
+            guide: <a href={links.docs} target="_blank" rel="noreferrer">{links.docs.replace("https://", "")}</a>.
+          </p>
+        </article>
+      </div>
+    </main>
+  );
+}
