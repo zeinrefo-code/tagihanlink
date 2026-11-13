@@ -2,7 +2,7 @@
 
 import { links, TUSD8_ADDRESS, erc20Abi } from "@aevum-kit/aevum";
 import { formatEther, formatUnits } from "viem";
-import { useAccount, useBalance, useBytecode, useReadContract } from "wagmi";
+import { useAccount, useBalance, useBytecode, useReadContract, useWatchAsset } from "wagmi";
 import { CheckIcon, CrossIcon, WarnIcon } from "@/components/Icons";
 import { useToken } from "@/components/useToken";
 import { useNetwork } from "@/lib/network";
@@ -18,6 +18,9 @@ interface Check {
 }
 
 const DISCORD_FAUCET = "Run /faucet <your address> in #faucet on the QDay Discord (1 tQDAY + 5 tUSD8, once).";
+
+// Shown on a fork, where balances surprise people: they are the real testnet balances.
+const FORK_COPY = "Copied from Aevum testnet when the fork started. Spending it here doesn't touch the real testnet.";
 
 export default function SetupPage() {
   const { net, select } = useNetwork();
@@ -38,6 +41,18 @@ export default function SetupPage() {
     query: { enabled: onChain && Boolean(token.address) },
   });
   const code = useBytecode({ address: checkoutAddress, chainId: appChain.id, query: { enabled: Boolean(checkoutAddress) } });
+
+  // Wallets don't list tokens on custom networks by themselves. This asks the wallet to show it
+  // on the network it is on now (the app's network, since the button only shows when onChain).
+  const { watchAsset } = useWatchAsset();
+  const addToken =
+    onChain && token.address
+      ? {
+          label: `Add ${token.symbol} to wallet`,
+          onClick: () =>
+            watchAsset({ type: "ERC20", options: { address: token.address!, symbol: token.symbol, decimals: token.decimals } }),
+        }
+      : undefined;
 
   const gasValue = gas.data?.value;
   const tokenValue = tokenBal.data;
@@ -60,17 +75,17 @@ export default function SetupPage() {
     !onChain || gasValue === undefined
       ? { title: `Gas (${appChain.nativeCurrency.symbol})`, status: "idle", value: "—", detail: "Pays for transactions. Gasless checkout doesn't need it." }
       : gasValue > 0n
-        ? { title: `Gas (${appChain.nativeCurrency.symbol})`, status: "ok", value: `${Number(formatEther(gasValue)).toFixed(4)} ${appChain.nativeCurrency.symbol}`, detail: "1 tQDAY covers hundreds of contract calls at 1 gwei." }
+        ? { title: `Gas (${appChain.nativeCurrency.symbol})`, status: "ok", value: `${Number(formatEther(gasValue)).toFixed(4)} ${appChain.nativeCurrency.symbol}`, detail: chainMode === "fork" ? FORK_COPY : "1 tQDAY covers hundreds of contract calls at 1 gwei." }
         : chainMode === "aevum"
           ? { title: "Gas (tQDAY)", status: "warn", value: "0 tQDAY", detail: DISCORD_FAUCET, action: { label: "Open web faucet", href: links.faucetWeb } }
           : { title: "Gas", status: "warn", value: "0", detail: "Use an anvil account (see README › Local development)." },
     !onChain || tokenValue === undefined
       ? { title: `${token.symbol} balance`, status: "idle", value: "—", detail: "The stablecoin the checkout uses (6 decimals)." }
       : tokenValue > 0n
-        ? { title: `${token.symbol} balance`, status: "ok", value: `${formatUnits(tokenValue, token.decimals)} ${token.symbol}`, detail: "Ready to pay." }
+        ? { title: `${token.symbol} balance`, status: "ok", value: `${formatUnits(tokenValue, token.decimals)} ${token.symbol}`, detail: chainMode === "fork" ? "Ready to pay. Also copied from Aevum testnet." : "Ready to pay.", action: addToken }
         : chainMode === "aevum"
-          ? { title: "tUSD8 balance", status: "warn", value: "0 tUSD8", detail: DISCORD_FAUCET }
-          : { title: `${token.symbol} balance`, status: "warn", value: "0", detail: chainMode === "fork" ? "On a fork, give yourself tUSD8 with `make deal TO=<address>`." : "MockUSD8 lets anyone mint: `make mint TO=<address>`." },
+          ? { title: "tUSD8 balance", status: "warn", value: "0 tUSD8", detail: DISCORD_FAUCET, action: addToken }
+          : { title: `${token.symbol} balance`, status: "warn", value: "0", detail: chainMode === "fork" ? "On a fork, give yourself tUSD8 with `make deal TO=<address>`." : "MockUSD8 lets anyone mint: `make mint TO=<address>`.", action: addToken },
     !checkoutAddress
       ? { title: "Checkout contract", status: "warn", value: "not set", detail: chainMode === "aevum" ? "Deploy it with `make deploy-aevum`, then set NEXT_PUBLIC_CHECKOUT_AEVUM in web/.env.local." : chainMode === "fork" ? "Deploy it with `make deploy-fork`, then set NEXT_PUBLIC_CHECKOUT_FORK in web/.env.local." : "Deploy it with `make deploy-local`, then set NEXT_PUBLIC_CHECKOUT_LOCAL in web/.env.local." }
       : code.isLoading
@@ -138,6 +153,7 @@ export default function SetupPage() {
             <h2>Network details</h2>
             <p className="sub">
               Already set in <code>packages/aevum/src/chain.ts</code>.
+              {chainMode === "fork" && " Balances start as a copy of Aevum testnet; what you spend here stays on your machine."}
             </p>
             <dl className="kv">
               <dt>Name</dt>
