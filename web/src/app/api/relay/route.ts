@@ -10,7 +10,7 @@ import {
 } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import { checkoutAbi } from "@aevum-kit/aevum";
-import { appChain, checkoutAddress } from "@/lib/env";
+import { defaultNetwork, networkByChainId, type Network } from "@/lib/env";
 import { explain } from "@/lib/errors";
 
 /**
@@ -46,20 +46,20 @@ function rateLimited(ip: string): boolean {
 
 const isUint = (v: unknown): v is string => typeof v === "string" && /^\d{1,78}$/.test(v);
 
-/** GET tells the app whether gasless mode is available. */
-export async function GET() {
+/** The configured network a request is for. No chainId means the default network. */
+function networkFor(chainId: unknown): Network | undefined {
+  if (chainId === undefined || chainId === null || chainId === "") return defaultNetwork;
+  return networkByChainId(Number(chainId));
+}
+
+/** GET /api/relay?chainId=… tells the app whether gasless mode is available on that network. */
+export async function GET(req: Request) {
   const account = relayer();
-  return NextResponse.json({ enabled: Boolean(account && checkoutAddress), relayer: account?.address ?? null });
+  const net = networkFor(new URL(req.url).searchParams.get("chainId"));
+  return NextResponse.json({ enabled: Boolean(account && net?.checkout), relayer: account?.address ?? null });
 }
 
 export async function POST(req: Request) {
-  const account = relayer();
-  if (!account || !checkoutAddress) {
-    return NextResponse.json(
-      { error: "Gasless mode is off. Set RELAYER_PRIVATE_KEY and NEXT_PUBLIC_CHECKOUT_ADDRESS in web/.env.local." },
-      { status: 503 },
-    );
-  }
 
   const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "local";
   if (rateLimited(ip)) return NextResponse.json({ error: "Too many requests. Wait a minute." }, { status: 429 });
@@ -69,6 +69,18 @@ export async function POST(req: Request) {
     body = await req.json();
   } catch {
     return NextResponse.json({ error: "Invalid JSON." }, { status: 400 });
+  }
+
+  // Only networks the app is configured for, and only their Checkout.
+  const account = relayer();
+  const net = networkFor(body.chainId);
+  const checkoutAddress = net?.checkout;
+  if (!net) return NextResponse.json({ error: "This network isn't enabled in the app." }, { status: 400 });
+  if (!account || !checkoutAddress) {
+    return NextResponse.json(
+      { error: `Gasless mode is off on ${net.label}. Set RELAYER_PRIVATE_KEY and NEXT_PUBLIC_CHECKOUT_${net.key.toUpperCase()} in web/.env.local.` },
+      { status: 503 },
+    );
   }
   const { orderId, from, amount, validAfter, validBefore, signature } = body;
   if (
@@ -92,9 +104,9 @@ export async function POST(req: Request) {
   }
   const vNum = v !== undefined ? Number(v) : 27 + (yParity ?? 0);
 
-  const transport = http(process.env.RPC_URL || undefined);
-  const client = createPublicClient({ chain: appChain, transport });
-  const wallet = createWalletClient({ account, chain: appChain, transport });
+  const transport = http();
+  const client = createPublicClient({ chain: net.chain, transport });
+  const wallet = createWalletClient({ account, chain: net.chain, transport });
 
   try {
     const call = {

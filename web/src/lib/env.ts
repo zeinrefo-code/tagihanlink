@@ -1,23 +1,74 @@
-import { isAddress, type Address } from "viem";
+import { isAddress, type Address, type Chain } from "viem";
 import { aevumFork, aevumTestnet, localAnvil } from "@aevum-kit/aevum";
 
-export type ChainMode = "aevum" | "fork" | "local";
+export type NetworkKey = "aevum" | "fork" | "local";
 
-const mode = (process.env.NEXT_PUBLIC_CHAIN ?? "aevum") as ChainMode;
+export interface Network {
+  key: NetworkKey;
+  /** Short name for the network switcher. */
+  label: string;
+  chain: Chain;
+  /** Your Checkout on this network, if you deployed one. */
+  checkout?: Address;
+  /** Only scan events from this block onward on the Activity page. */
+  deployBlock?: bigint;
+  /** Explorer links only make sense on the real testnet. */
+  hasExplorer: boolean;
+}
 
-export const chainMode: ChainMode = mode === "fork" || mode === "local" ? mode : "aevum";
+const address = (v: string | undefined): Address | undefined => (v && isAddress(v.trim()) ? (v.trim() as Address) : undefined);
+const block = (v: string | undefined): bigint | undefined => (v && /^\d+$/.test(v.trim()) ? BigInt(v.trim()) : undefined);
 
-export const appChain = chainMode === "fork" ? aevumFork : chainMode === "local" ? localAnvil : aevumTestnet;
+// NEXT_PUBLIC_* values must be written out in full so Next.js can inline them into the browser bundle.
+const all: Record<NetworkKey, Network> = {
+  aevum: {
+    key: "aevum",
+    label: "Aevum testnet",
+    chain: aevumTestnet,
+    checkout: address(process.env.NEXT_PUBLIC_CHECKOUT_AEVUM),
+    deployBlock: block(process.env.NEXT_PUBLIC_DEPLOY_BLOCK_AEVUM),
+    hasExplorer: true,
+  },
+  fork: {
+    key: "fork",
+    label: "Local fork",
+    chain: aevumFork,
+    checkout: address(process.env.NEXT_PUBLIC_CHECKOUT_FORK),
+    deployBlock: block(process.env.NEXT_PUBLIC_DEPLOY_BLOCK_FORK),
+    hasExplorer: false,
+  },
+  local: {
+    key: "local",
+    label: "Local anvil",
+    chain: localAnvil,
+    checkout: address(process.env.NEXT_PUBLIC_CHECKOUT_LOCAL),
+    deployBlock: undefined,
+    hasExplorer: false,
+  },
+};
 
-const rawCheckout = process.env.NEXT_PUBLIC_CHECKOUT_ADDRESS ?? "";
-export const checkoutAddress: Address | undefined = isAddress(rawCheckout) ? rawCheckout : undefined;
+const requested = (process.env.NEXT_PUBLIC_NETWORKS ?? "aevum")
+  .split(",")
+  .map((k) => k.trim())
+  .filter((k): k is NetworkKey => k in all);
+
+/** The networks the app offers, in the order of NEXT_PUBLIC_NETWORKS. The first one is the default. */
+export const networks: [Network, ...Network[]] = (() => {
+  const keys = [...new Set(requested)];
+  const list = (keys.length ? keys : (["aevum"] as NetworkKey[])).map((k) => all[k]);
+  return list as [Network, ...Network[]];
+})();
+
+export const defaultNetwork = networks[0];
+
+export function networkByChainId(chainId: number | undefined): Network | undefined {
+  return networks.find((n) => n.chain.id === chainId);
+}
+
+export function networkByKey(key: string | null | undefined): Network | undefined {
+  return networks.find((n) => n.key === key);
+}
 
 export const walletConnectProjectId = process.env.NEXT_PUBLIC_WC_PROJECT_ID || undefined;
-
-const rawDeployBlock = process.env.NEXT_PUBLIC_DEPLOY_BLOCK ?? "";
-export const deployBlock: bigint | undefined = /^\d+$/.test(rawDeployBlock) ? BigInt(rawDeployBlock) : undefined;
-
-/** Explorer links only make sense on the real testnet. */
-export const hasExplorer = chainMode === "aevum";
 
 export const repoUrl = "https://github.com/qday-io/aevum-starter-kit";

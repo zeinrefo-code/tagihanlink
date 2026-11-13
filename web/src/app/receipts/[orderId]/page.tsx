@@ -6,10 +6,14 @@ import { useParams, useSearchParams } from "next/navigation";
 import { formatUnits, isHash, isHex, type Hex } from "viem";
 import { useReadContract, useTransactionReceipt } from "wagmi";
 import { useToken } from "@/components/useToken";
-import { appChain, checkoutAddress, hasExplorer } from "@/lib/env";
+import { useNetwork } from "@/lib/network";
 import { orderLabel } from "@/lib/order";
 
 export default function ReceiptPage() {
+  const { net } = useNetwork();
+  const appChain = net.chain;
+  const checkoutAddress = net.checkout;
+  const hasExplorer = net.hasExplorer;
   const params = useParams<{ orderId: string }>();
   const search = useSearchParams();
   const orderId = params.orderId;

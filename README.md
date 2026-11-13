@@ -42,7 +42,7 @@ make check            # build, Shanghai opcode check, unit tests, fork tests
 Run the whole app against a **local copy of Aevum**, with the real tUSD8 and free test balances:
 
 ```bash
-# terminal 1: local fork of Aevum testnet on 127.0.0.1:8545
+# terminal 1: local copy of Aevum testnet on 127.0.0.1:8545 (chain 440050)
 make fork
 
 # terminal 2: deploy Checkout and give yourself test money
@@ -50,15 +50,15 @@ make deploy-fork                      # prints the Checkout address
 make deal TO=<your wallet address>    # 100 tUSD8 + 10 tQDAY, on the fork only
 
 cp web/.env.example web/.env.local
-#   NEXT_PUBLIC_CHAIN=fork
-#   NEXT_PUBLIC_CHECKOUT_ADDRESS=<address from deploy-fork>
+#   NEXT_PUBLIC_NETWORKS=fork,aevum
+#   NEXT_PUBLIC_CHECKOUT_FORK=<address from deploy-fork>
 #   RELAYER_PRIVATE_KEY=<a test key, see below>   (optional: enables gasless mode)
 make dev                              # http://localhost:3000
 ```
 
-In your wallet, point chain ID `44005` at RPC `http://127.0.0.1:8545`. If your wallet already has Aevum saved, add the local RPC to that network and switch to it (MetaMask allows several RPCs per network); switch back to `https://rpc-test.qday.info` when you're done. Otherwise the app reads the fork while your wallet sends to the real testnet.
+Use the **Local fork / Aevum testnet** switcher in the app's header. The first time you pick the fork, your wallet offers to add "Aevum fork (local)" as a new network; after that, switching is one click and your real testnet network stays untouched.
 
-> **Test on the fork with a fresh, empty account.** The fork has the same chain ID as the real testnet, so an approval or signature made for a fork contract is also valid on the real testnet. `make deploy-fork` deploys from a random address nobody holds the key to, so its Checkout address can't be taken over on the real testnet, but keep wallets that hold real testnet funds out of fork testing anyway.
+**Why the fork has its own chain ID (440050):** it copies Aevum's state (accounts, balances, tUSD8) but anything you sign there, such as an EIP-3009 authorization or a permit, can't be replayed on the real testnet, and wallets never mix the two up. `make deploy-fork` also deploys from a random address nobody has the key to, so its contract addresses can't be claimed on the real testnet.
 
 For a local relayer, any of anvil's [default test accounts](https://book.getfoundry.sh/anvil/#getting-started) works. Those keys are public: use them on local chains only.
 
@@ -106,7 +106,7 @@ make deploy-aevum ACCOUNT=aevum-deployer          # uses real tUSD8; MERCHANT de
 # MERCHANT=0x... make deploy-aevum ACCOUNT=aevum-deployer   to send payments elsewhere
 ```
 
-Then set `NEXT_PUBLIC_CHAIN=aevum` and `NEXT_PUBLIC_CHECKOUT_ADDRESS` in `web/.env.local`.
+Then set `NEXT_PUBLIC_CHECKOUT_AEVUM` in `web/.env.local` and add `aevum` to `NEXT_PUBLIC_NETWORKS`.
 
 > Use a wallet made only for testing. Never paste a private key into chat, an issue, or a committed file.
 
@@ -199,7 +199,7 @@ make test           Unit tests (local, no network)
 make test-fork      Tests against the real tUSD8 on a local fork of Aevum
 make check          Everything CI runs
 make anvil          Empty local chain (31337) with Aevum's EVM rules
-make fork           Local copy of Aevum testnet (44005) on 127.0.0.1:8545
+make fork           Local copy of Aevum testnet on 127.0.0.1:8545 (chain 440050)
 make deploy-local   Deploy MockUSD8 + Checkout to `make anvil`
 make deploy-fork    Deploy Checkout (real tUSD8) to `make fork`
 make deploy-aevum   Deploy Checkout to Aevum testnet (ACCOUNT=<keystore>)

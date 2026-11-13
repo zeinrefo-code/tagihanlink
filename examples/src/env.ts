@@ -29,13 +29,12 @@ export function requiredKey(name: string): Hex {
   return key;
 }
 
-/** Picks the chain from the RPC: Aevum testnet, a local fork of it, or plain anvil. */
+/** Picks the chain from the RPC's chain ID: Aevum testnet, `make fork`, or plain anvil. */
 export async function connect() {
   const rpcUrl = process.env.RPC_URL?.trim() || aevumTestnet.rpcUrls.default.http[0];
   const probe = createPublicClient({ transport: http(rpcUrl) });
   const id = await probe.getChainId();
-  const isLocal = /127\.0\.0\.1|localhost/.test(rpcUrl);
-  const chain = id === aevumTestnet.id ? (isLocal ? aevumFork : aevumTestnet) : { ...localAnvil, id };
+  const chain = id === aevumTestnet.id ? aevumTestnet : id === aevumFork.id ? aevumFork : { ...localAnvil, id };
   const client = createPublicClient({ chain, transport: http(rpcUrl) });
   return { client, chain, rpcUrl };
 }

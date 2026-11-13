@@ -5,8 +5,9 @@ import {
   rabbyWallet,
   walletConnectWallet,
 } from "@rainbow-me/rainbowkit/wallets";
+import type { Chain } from "viem";
 import { createConfig, http, type Transport } from "wagmi";
-import { appChain, walletConnectProjectId } from "./env";
+import { networks, walletConnectProjectId } from "./env";
 
 const appName = "Aevum Starter Kit";
 
@@ -22,9 +23,11 @@ const connectors = connectorsForWallets(
   { appName, projectId: walletConnectProjectId ?? "not-set" },
 );
 
+const chains = networks.map((n) => n.chain) as [Chain, ...Chain[]];
+
 export const wagmiConfig = createConfig({
-  chains: [appChain],
+  chains,
   connectors,
-  transports: { [appChain.id]: http() } as Record<typeof appChain.id, Transport>,
+  transports: Object.fromEntries(chains.map((c) => [c.id, http()])) as Record<number, Transport>,
   ssr: true,
 });

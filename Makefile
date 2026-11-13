@@ -10,6 +10,8 @@ TUSD8_MM    := 0x4d4b7031D35B74215bebe33F6AF6e682Ea99d0b1
 # anvil's first default account (public test account, local chains only).
 ANVIL_0     := 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266
 AMOUNT      ?= 100
+# `make fork` runs under its own chain ID so wallets and signatures never mix it up with the real testnet.
+FORK_CHAIN  := 440050
 
 .PHONY: help install build test test-fork check anvil fork deploy-local deploy-fork deploy-aevum mint deal dev
 
@@ -36,18 +38,17 @@ check: build test test-fork ## Everything CI runs
 anvil: ## Empty local chain (31337) with Aevum's EVM rules
 	anvil --hardfork shanghai
 
-fork: ## Local copy of Aevum testnet (44005) on 127.0.0.1:8545
-	anvil --fork-url $(AEVUM_RPC) --hardfork shanghai
+fork: ## Local copy of Aevum testnet on 127.0.0.1:8545 (chain 440050)
+	anvil --fork-url $(AEVUM_RPC) --hardfork shanghai --chain-id $(FORK_CHAIN)
 
 deploy-local: ## Deploy MockUSD8 + Checkout to `make anvil`
 	cd contracts && forge script script/Deploy.s.sol --rpc-url $(LOCAL_RPC) --broadcast --unlocked --sender $(ANVIL_0)
 
-# The fork shares chain ID 44005 with the real testnet, so anything approved or signed for
-# a fork contract is also valid there. If we deployed from a public anvil account, the same
-# contract address could be claimed on the real testnet by anyone holding that public key.
-# Deploy from a random address nobody has the key for instead (anvil impersonates it).
+# Deploy from a random address nobody has the key for (anvil impersonates it), not from a public
+# anvil account. Otherwise the fork's contract addresses could be claimed on the real testnet by
+# anyone holding that public key.
 deploy-fork: ## Deploy Checkout (real tUSD8) to `make fork`
-	@test "$$(cast chain-id --rpc-url $(LOCAL_RPC))" = "44005" || (echo "This only works on 'make fork'." && exit 1)
+	@test "$$(cast chain-id --rpc-url $(LOCAL_RPC))" = "$(FORK_CHAIN)" || (echo "This only works on 'make fork'." && exit 1)
 	@DEPLOYER=$$(cast to-check-sum-address 0x$$(openssl rand -hex 20)); \
 	  cast rpc anvil_setBalance $$DEPLOYER 0x8ac7230489e80000 --rpc-url $(LOCAL_RPC) > /dev/null && \
 	  cast rpc anvil_impersonateAccount $$DEPLOYER --rpc-url $(LOCAL_RPC) > /dev/null && \
@@ -66,7 +67,7 @@ mint: ## `make anvil` only: mint AMOUNT MockUSD8 to TO. Needs CHECKOUT=<address>
 
 deal: ## `make fork` only: give TO AMOUNT tUSD8 and 10 tQDAY for gas
 	@test -n "$(TO)" || (echo "Usage: make deal TO=0x... [AMOUNT=100]" && exit 1)
-	@test "$$(cast chain-id --rpc-url $(LOCAL_RPC))" = "44005" || (echo "This only works on 'make fork'." && exit 1)
+	@test "$$(cast chain-id --rpc-url $(LOCAL_RPC))" = "$(FORK_CHAIN)" || (echo "This only works on 'make fork'." && exit 1)
 	@cast rpc anvil_setBalance $(TO) 0x8ac7230489e80000 --rpc-url $(LOCAL_RPC) > /dev/null
 	@cast rpc anvil_impersonateAccount $(TUSD8_MM) --rpc-url $(LOCAL_RPC) > /dev/null
 	@cast rpc anvil_setBalance $(TUSD8_MM) 0x56BC75E2D63100000 --rpc-url $(LOCAL_RPC) > /dev/null

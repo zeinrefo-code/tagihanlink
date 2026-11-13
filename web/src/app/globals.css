@@ -253,3 +253,12 @@ dl.faq dd { margin: 0; color: var(--text-2); line-height: 1.65; }
   .docs-toc a { border: 1px solid var(--line); }
 }
 .docs-body .grid-2 { grid-template-columns: minmax(0, 1fr); gap: 14px; }
+
+/* ---------- network switch ---------- */
+.net-switch { display: inline-flex; padding: 3px; gap: 2px; border: 1px solid var(--line-strong); border-radius: 10px; background: var(--surface); }
+.net-switch button { display: inline-flex; align-items: center; gap: 7px; font: inherit; font-size: 13px; font-weight: 500; padding: 6px 11px; border: 0; border-radius: 7px; background: transparent; color: var(--text-muted); cursor: pointer; white-space: nowrap; }
+.net-switch button:hover { color: var(--text); }
+.net-switch button[aria-checked="true"] { background: var(--surface-2); color: var(--text); }
+.net-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--text-faint); }
+.net-dot.aevum { background: var(--good); }
+.net-dot.fork, .net-dot.local { background: var(--warn); }

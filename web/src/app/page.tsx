@@ -5,7 +5,7 @@ import { formatEther, formatUnits } from "viem";
 import { useAccount, useBalance, useBytecode, useReadContract, useSwitchChain } from "wagmi";
 import { CheckIcon, CrossIcon, WarnIcon } from "@/components/Icons";
 import { useToken } from "@/components/useToken";
-import { appChain, chainMode, checkoutAddress } from "@/lib/env";
+import { useNetwork } from "@/lib/network";
 import { short } from "@/lib/order";
 
 type Status = "ok" | "warn" | "bad" | "idle";
@@ -20,6 +20,10 @@ interface Check {
 const DISCORD_FAUCET = "Run /faucet <your address> in #faucet on the QDay Discord (1 tQDAY + 5 tUSD8, once).";
 
 export default function SetupPage() {
+  const { net } = useNetwork();
+  const appChain = net.chain;
+  const chainMode = net.key;
+  const checkoutAddress = net.checkout;
   const { address, isConnected, chainId, connector } = useAccount();
   const { switchChain } = useSwitchChain();
   const onChain = isConnected && chainId === appChain.id;
@@ -69,12 +73,12 @@ export default function SetupPage() {
           ? { title: "tUSD8 balance", status: "warn", value: "0 tUSD8", detail: DISCORD_FAUCET }
           : { title: `${token.symbol} balance`, status: "warn", value: "0", detail: chainMode === "fork" ? "On a fork, give yourself tUSD8 with `make deal TO=<address>`." : "MockUSD8 lets anyone mint: `make mint TO=<address>`." },
     !checkoutAddress
-      ? { title: "Checkout contract", status: "warn", value: "not set", detail: "Deploy it (`make deploy-aevum` or `make deploy-local`), then set NEXT_PUBLIC_CHECKOUT_ADDRESS in web/.env.local." }
+      ? { title: "Checkout contract", status: "warn", value: "not set", detail: chainMode === "aevum" ? "Deploy it with `make deploy-aevum`, then set NEXT_PUBLIC_CHECKOUT_AEVUM in web/.env.local." : chainMode === "fork" ? "Deploy it with `make deploy-fork`, then set NEXT_PUBLIC_CHECKOUT_FORK in web/.env.local." : "Deploy it with `make deploy-local`, then set NEXT_PUBLIC_CHECKOUT_LOCAL in web/.env.local." }
       : code.isLoading
         ? { title: "Checkout contract", status: "idle", value: short(checkoutAddress), detail: "Looking it up…" }
         : code.data && code.data !== "0x"
           ? { title: "Checkout contract", status: "ok", value: short(checkoutAddress), detail: "Deployed and reachable." }
-          : { title: "Checkout contract", status: "bad", value: short(checkoutAddress), detail: `No contract at this address on ${appChain.name}. Check NEXT_PUBLIC_CHAIN and the address.` },
+          : { title: "Checkout contract", status: "bad", value: short(checkoutAddress), detail: `No contract at this address on ${appChain.name}. Check the address in web/.env.local.` },
   ];
 
   const passed = checks.filter((c) => c.status === "ok").length;
@@ -144,7 +148,7 @@ export default function SetupPage() {
               <dt>RPC</dt>
               <dd>{appChain.rpcUrls.default.http[0]}</dd>
               <dt>Explorer</dt>
-              <dd>{links.explorer.replace("https://", "")}</dd>
+              <dd>{net.hasExplorer ? links.explorer.replace("https://", "") : "none (local chain)"}</dd>
               <dt>tUSD8</dt>
               <dd>{chainMode === "local" ? "MockUSD8 (local)" : `${short(TUSD8_ADDRESS)} · 6 dec`}</dd>
               <dt>EVM</dt>

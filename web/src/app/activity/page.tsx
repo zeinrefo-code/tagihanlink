@@ -7,7 +7,7 @@ import { useState } from "react";
 import { formatUnits, getAbiItem, type PublicClient } from "viem";
 import { useAccount, usePublicClient } from "wagmi";
 import { useToken } from "@/components/useToken";
-import { appChain, checkoutAddress, deployBlock, hasExplorer } from "@/lib/env";
+import { useNetwork } from "@/lib/network";
 import { orderLabel, short } from "@/lib/order";
 
 const WINDOWS = [
@@ -17,6 +17,11 @@ const WINDOWS = [
 ];
 
 export default function ActivityPage() {
+  const { net } = useNetwork();
+  const appChain = net.chain;
+  const checkoutAddress = net.checkout;
+  const deployBlock = net.deployBlock;
+  const hasExplorer = net.hasExplorer;
   const client = usePublicClient({ chainId: appChain.id }) as PublicClient | undefined;
   const { address } = useAccount();
   const token = useToken();
@@ -25,7 +30,7 @@ export default function ActivityPage() {
   const [progress, setProgress] = useState(0);
 
   const logs = useQuery({
-    queryKey: ["paid-logs", checkoutAddress, windowSize.toString(), onlyMine ? address : null],
+    queryKey: ["paid-logs", appChain.id, checkoutAddress, windowSize.toString(), onlyMine ? address : null],
     enabled: Boolean(client && checkoutAddress),
     queryFn: async () => {
       const head = await client!.getBlockNumber();
@@ -69,7 +74,7 @@ export default function ActivityPage() {
 
       {!checkoutAddress ? (
         <div className="card empty">
-          No Checkout configured. Set <code>NEXT_PUBLIC_CHECKOUT_ADDRESS</code> in <code>web/.env.local</code>.
+          No Checkout configured for {net.label}. Set <code>NEXT_PUBLIC_CHECKOUT_{net.key.toUpperCase()}</code> in <code>web/.env.local</code>.
         </div>
       ) : (
         <section className="card flush">

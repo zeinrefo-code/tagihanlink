@@ -11,8 +11,7 @@ next-env.d.ts
 # foundry
 contracts/out/
 contracts/cache/
-# deployment logs (a fork also reports chain 44005, so keep these out by default;
-# `git add -f` the real Aevum one if you want it in your repo)
+# deployment logs (keep local runs out; `git add -f` the Aevum 44005 one if you want it in your repo)
 contracts/broadcast/
 
 .DS_Store

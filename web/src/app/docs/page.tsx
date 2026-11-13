@@ -67,7 +67,7 @@ make check            # build, Shanghai opcode check, unit tests, fork tests
 `}</Code>
             <p>Run the whole app against a local copy of Aevum, with the real tUSD8 and free test balances:</p>
             <Code>{`
-# terminal 1: local fork of Aevum testnet on 127.0.0.1:8545
+# terminal 1: local copy of Aevum testnet on 127.0.0.1:8545 (chain 440050)
 make fork
 
 # terminal 2: deploy Checkout and give yourself test money
@@ -75,23 +75,23 @@ make deploy-fork                      # prints the Checkout address
 make deal TO=<your wallet address>    # 100 tUSD8 + 10 tQDAY, on the fork only
 
 cp web/.env.example web/.env.local
-#   NEXT_PUBLIC_CHAIN=fork
-#   NEXT_PUBLIC_CHECKOUT_ADDRESS=<address from deploy-fork>
+#   NEXT_PUBLIC_NETWORKS=fork,aevum
+#   NEXT_PUBLIC_CHECKOUT_FORK=<address from deploy-fork>
 #   RELAYER_PRIVATE_KEY=<an anvil test key>   (optional: enables gasless mode)
 make dev
 `}</Code>
             <p>
-              In your wallet, point a network with chain ID <code>44005</code> at RPC <code>http://127.0.0.1:8545</code>. If your wallet already
-              has Aevum saved with the public RPC, change that RPC while you test on the fork, or use a separate browser profile. Otherwise the
-              app reads the fork while your wallet sends to the real testnet.
+              Use the <strong>Local fork / Aevum testnet</strong> switcher in the header. The first time you pick the fork, your wallet offers to
+              add &quot;Aevum fork (local)&quot; as a new network. After that, switching is one click, and your real testnet network stays
+              untouched.
             </p>
-            <div className="notice warn">
-              <strong>Test on the fork with a fresh, empty account.</strong>
-              <span>
-                The fork has the same chain ID as the real testnet, so an approval or signature made for a fork contract is also valid on the
-                real testnet. <code>make deploy-fork</code> deploys from a random address nobody holds the key to, so its Checkout address
-                can&apos;t be taken over there, but keep wallets that hold real testnet funds out of fork testing anyway.
-              </span>
+            <div className="card info">
+              <h3>Why the fork has its own chain ID (440050)</h3>
+              <p className="sub">
+                It copies Aevum&apos;s state (accounts, balances, tUSD8), but anything you sign there, such as an EIP-3009 authorization or a
+                permit, can&apos;t be replayed on the real testnet, and wallets never mix the two up. <code>make deploy-fork</code> also deploys
+                from a random address nobody has the key to, so its contract addresses can&apos;t be claimed on the real testnet.
+              </p>
             </div>
             <p>
               Any of anvil&apos;s default accounts works as a local relayer. Those keys are public: use them on local chains only. Want an empty
@@ -150,7 +150,8 @@ make deploy-aevum ACCOUNT=aevum-deployer          # MERCHANT defaults to the dep
 MERCHANT=0x... make deploy-aevum ACCOUNT=aevum-deployer
 `}</Code>
             <p>
-              Then set <code>NEXT_PUBLIC_CHAIN=aevum</code> and <code>NEXT_PUBLIC_CHECKOUT_ADDRESS</code> in <code>web/.env.local</code>.
+              Then set <code>NEXT_PUBLIC_CHECKOUT_AEVUM</code> in <code>web/.env.local</code> and add <code>aevum</code> to{" "}
+              <code>NEXT_PUBLIC_NETWORKS</code>.
             </p>
             <div className="notice bad">
               <strong>Use a wallet made only for testing.</strong>
@@ -270,7 +271,7 @@ make test           Unit tests (local, no network)
 make test-fork      Tests against the real tUSD8 on a local fork of Aevum
 make check          Everything CI runs
 make anvil          Empty local chain (31337) with Aevum's EVM rules
-make fork           Local copy of Aevum testnet (44005) on 127.0.0.1:8545
+make fork           Local copy of Aevum testnet on 127.0.0.1:8545 (chain 440050)
 make deploy-local   Deploy MockUSD8 + Checkout to \`make anvil\`
 make deploy-fork    Deploy Checkout (real tUSD8) to \`make fork\`
 make deploy-aevum   Deploy Checkout to Aevum testnet (ACCOUNT=<keystore>)

@@ -8,7 +8,7 @@
  */
 import { createWalletClient, formatUnits, http, keccak256, parseUnits, parseSignature, toHex } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
-import { authorizationWindow, checkoutAbi, checkoutTypedData, erc20Abi, txUrl } from "@aevum-kit/aevum";
+import { aevumTestnet, authorizationWindow, checkoutAbi, checkoutTypedData, erc20Abi, txUrl } from "@aevum-kit/aevum";
 import { connect, requiredAddress, requiredKey } from "./env";
 
 const { client, chain, rpcUrl } = await connect();
@@ -43,4 +43,4 @@ const hash = await relayer.writeContract({ ...call, type: "legacy" });
 const receipt = await client.waitForTransactionReceipt({ hash });
 
 console.log(`Relayer ${relayer.account.address} submitted: ${receipt.status} in block ${receipt.blockNumber}`);
-console.log(chain.id === 44005 && !/127\.0\.0\.1|localhost/.test(rpcUrl) ? txUrl(hash) : `tx ${hash}`);
+console.log(chain.id === aevumTestnet.id ? txUrl(hash) : `tx ${hash}`);

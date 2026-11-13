@@ -9,7 +9,7 @@ import { useAccount, useConfig, useReadContract } from "wagmi";
 import { readContract, signTypedData, waitForTransactionReceipt, writeContract } from "wagmi/actions";
 import { CheckIcon } from "@/components/Icons";
 import { useToken } from "@/components/useToken";
-import { appChain, checkoutAddress, hasExplorer } from "@/lib/env";
+import { useNetwork } from "@/lib/network";
 import { explain } from "@/lib/errors";
 import { demoOrder, newOrderId, orderLabel, short } from "@/lib/order";
 
@@ -30,6 +30,10 @@ const STEPS: Record<Mode, { title: string; who: string }[]> = {
 };
 
 export default function CheckoutPage() {
+  const { net } = useNetwork();
+  const appChain = net.chain;
+  const checkoutAddress = net.checkout;
+  const hasExplorer = net.hasExplorer;
   const config = useConfig();
   const { address, isConnected, chainId } = useAccount();
   const onChain = isConnected && chainId === appChain.id;
@@ -46,12 +50,12 @@ export default function CheckoutPage() {
   useEffect(() => setOrderId(newOrderId()), []);
 
   const relay = useQuery({
-    queryKey: ["relay-status"],
-    queryFn: async () => (await fetch("/api/relay")).json() as Promise<{ enabled: boolean; relayer: string | null }>,
+    queryKey: ["relay-status", appChain.id],
+    queryFn: async () => (await fetch(`/api/relay?chainId=${appChain.id}`)).json() as Promise<{ enabled: boolean; relayer: string | null }>,
   });
   const gaslessAvailable = relay.data?.enabled ?? false;
   useEffect(() => {
-    if (relay.data && !relay.data.enabled) setMode("standard");
+    if (relay.data) setMode(relay.data.enabled ? "gasless" : "standard");
   }, [relay.data]);
 
   const balance = useReadContract({
@@ -79,7 +83,7 @@ export default function CheckoutPage() {
   async function payGasless() {
     if (!address || !checkoutAddress || !token.address || !orderId) return;
     // 1. Sign. The nonce comes from the contract and ties this signature to this order.
-    const nonce = await readContract(config, { address: checkoutAddress, abi: checkoutAbi, functionName: "authorizationNonce", args: [orderId] });
+    const nonce = await readContract(config, { address: checkoutAddress, abi: checkoutAbi, functionName: "authorizationNonce", args: [orderId], chainId: appChain.id });
     const { validAfter, validBefore } = authorizationWindow(600);
     const signature = await signTypedData(config, {
       account: address,
@@ -91,6 +95,7 @@ export default function CheckoutPage() {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
+        chainId: appChain.id,
         orderId,
         from: address,
         amount: amount.toString(),
@@ -109,14 +114,14 @@ export default function CheckoutPage() {
   async function payStandard() {
     if (!address || !checkoutAddress || !token.address || !orderId) return;
     // 1. Approve exactly the order total, never an unlimited amount.
-    const allowance = await readContract(config, { address: token.address, abi: erc20Abi, functionName: "allowance", args: [address, checkoutAddress] });
+    const allowance = await readContract(config, { address: token.address, abi: erc20Abi, functionName: "allowance", args: [address, checkoutAddress], chainId: appChain.id });
     if (allowance < amount) {
-      const approveHash = await writeContract(config, { address: token.address, abi: erc20Abi, functionName: "approve", args: [checkoutAddress, amount] });
-      await waitForTransactionReceipt(config, { hash: approveHash });
+      const approveHash = await writeContract(config, { address: token.address, abi: erc20Abi, functionName: "approve", args: [checkoutAddress, amount], chainId: appChain.id });
+      await waitForTransactionReceipt(config, { hash: approveHash, chainId: appChain.id });
     }
     setStep(1);
     // 2. Pay.
-    const hash = await writeContract(config, { address: checkoutAddress, abi: checkoutAbi, functionName: "pay", args: [orderId, amount] });
+    const hash = await writeContract(config, { address: checkoutAddress, abi: checkoutAbi, functionName: "pay", args: [orderId, amount], chainId: appChain.id });
     setTxHash(hash);
     setStep(2);
     return hash;
@@ -134,7 +139,7 @@ export default function CheckoutPage() {
     try {
       const hash = mode === "gasless" ? await payGasless() : await payStandard();
       if (!hash) throw new Error("Connect your wallet first.");
-      const receipt = await waitForTransactionReceipt(config, { hash });
+      const receipt = await waitForTransactionReceipt(config, { hash, chainId: appChain.id });
       if (receipt.status !== "success") throw new Error("The transaction reverted on chain. Nothing was charged.");
       setBlock(receipt.blockNumber);
       setStep(3);

@@ -3,7 +3,7 @@
  *   pnpm example check-setup
  */
 import { formatEther, formatUnits } from "viem";
-import { erc20Abi, TUSD8_ADDRESS, TUSD8_DECIMALS } from "@aevum-kit/aevum";
+import { aevumFork, aevumTestnet, erc20Abi, TUSD8_ADDRESS, TUSD8_DECIMALS } from "@aevum-kit/aevum";
 import { connect, requiredAddress } from "./env";
 
 const { client, chain, rpcUrl } = await connect();
@@ -22,7 +22,7 @@ console.log(`Gas price ${formatUnits(gasPrice, 9)} gwei`);
 console.log(`Address   ${address}`);
 console.log(`Gas       ${formatEther(native)} ${chain.nativeCurrency.symbol}`);
 
-if (chain.id === 44005) {
+if (chain.id === aevumTestnet.id || chain.id === aevumFork.id) {
   const tusd8 = await client.readContract({ address: TUSD8_ADDRESS, abi: erc20Abi, functionName: "balanceOf", args: [address] });
   console.log(`tUSD8     ${formatUnits(tusd8, TUSD8_DECIMALS)}`);
   if (native === 0n) console.log("\n→ No gas yet. Get tQDAY from the faucet (see README › Get test tokens).");

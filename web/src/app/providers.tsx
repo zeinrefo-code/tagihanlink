@@ -5,7 +5,8 @@ import { RainbowKitProvider, darkTheme } from "@rainbow-me/rainbowkit";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useState, type ReactNode } from "react";
 import { WagmiProvider } from "wagmi";
-import { appChain } from "@/lib/env";
+import { defaultNetwork } from "@/lib/env";
+import { NetworkProvider } from "@/lib/network";
 import { wagmiConfig } from "@/lib/wagmi";
 
 export function Providers({ children }: { children: ReactNode }) {
@@ -14,12 +15,12 @@ export function Providers({ children }: { children: ReactNode }) {
     <WagmiProvider config={wagmiConfig}>
       <QueryClientProvider client={queryClient}>
         <RainbowKitProvider
-          initialChain={appChain}
+          initialChain={defaultNetwork.chain}
           locale="en-US"
           theme={darkTheme({ accentColor: "#0257FF", borderRadius: "medium" })}
           appInfo={{ appName: "Aevum Starter Kit" }}
         >
-          {children}
+          <NetworkProvider>{children}</NetworkProvider>
         </RainbowKitProvider>
       </QueryClientProvider>
     </WagmiProvider>

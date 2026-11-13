@@ -34,11 +34,20 @@ export const localAnvil = defineChain({
   testnet: true,
 });
 
-/** A fork of Aevum keeps chain id 44005 but runs on your machine. */
+/**
+ * Chain ID of `make fork`. The fork copies Aevum's state but runs under its own chain ID, so:
+ *  - wallets keep it as a separate network next to the real testnet (switching is one click), and
+ *  - EIP-712 signatures made on the fork (permit, EIP-3009) are not valid on the real testnet.
+ */
+export const AEVUM_FORK_CHAIN_ID = 440050;
+
+/** `make fork`: a local copy of Aevum testnet on your machine. */
 export const aevumFork = defineChain({
   ...aevumTestnet,
+  id: AEVUM_FORK_CHAIN_ID,
   name: "Aevum fork (local)",
   rpcUrls: { default: { http: ["http://127.0.0.1:8545"] } },
+  blockExplorers: undefined,
 });
 
 /** Largest block range a single eth_getLogs call may cover on Aevum. */

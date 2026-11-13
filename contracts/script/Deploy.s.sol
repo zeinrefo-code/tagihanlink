@@ -7,22 +7,21 @@ import {Checkout} from "../src/Checkout.sol";
 import {MockUSD8} from "../src/mocks/MockUSD8.sol";
 
 /// @notice Deploys Checkout.
-///   - On Aevum testnet (44005) it uses the real tUSD8.
-///   - Anywhere else (local anvil) it deploys MockUSD8 first and mints 1,000 to the deployer.
+///   - Where tUSD8 exists (Aevum testnet, or `make fork`) it uses the real tUSD8.
+///   - Anywhere else (`make anvil`) it deploys MockUSD8 first and mints 1,000 to the deployer.
 ///   MERCHANT (optional env) receives payments; defaults to the deployer.
 ///
 ///   make deploy-local                         # anvil on 127.0.0.1:8545
 ///   make deploy-aevum ACCOUNT=deployer        # uses a keystore made with `cast wallet import`
 contract Deploy is Script {
     address constant AEVUM_TUSD8 = 0x456569838f1d43009A91ebA4263147Afd7233483;
-    uint256 constant AEVUM_TESTNET = 44005;
 
     function run() external returns (Checkout checkout, address token) {
         vm.startBroadcast();
         (, address deployer,) = vm.readCallers();
         address merchant = vm.envOr("MERCHANT", deployer);
 
-        if (block.chainid == AEVUM_TESTNET) {
+        if (AEVUM_TUSD8.code.length > 0) {
             token = AEVUM_TUSD8;
         } else {
             MockUSD8 mock = new MockUSD8();
