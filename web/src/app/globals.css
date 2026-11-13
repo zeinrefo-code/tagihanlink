@@ -262,3 +262,5 @@ dl.faq dd { margin: 0; color: var(--text-2); line-height: 1.65; }
 .net-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--text-faint); }
 .net-dot.aevum { background: var(--good); }
 .net-dot.fork, .net-dot.local { background: var(--warn); }
+.banner.info { border-bottom-color: var(--line-info); background: var(--surface-info); color: var(--accent-text); }
+.net-switch button:disabled { cursor: wait; opacity: 0.6; }

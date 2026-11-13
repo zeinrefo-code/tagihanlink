@@ -67,7 +67,7 @@ make check            # build, Shanghai opcode check, unit tests, fork tests
 `}</Code>
             <p>Run the whole app against a local copy of Aevum, with the real tUSD8 and free test balances:</p>
             <Code>{`
-# terminal 1: local copy of Aevum testnet on 127.0.0.1:8545 (chain 440050)
+# terminal 1: local copy of Aevum testnet on 127.0.0.1:8555 (chain 440050)
 make fork
 
 # terminal 2: deploy Checkout and give yourself test money
@@ -271,7 +271,7 @@ make test           Unit tests (local, no network)
 make test-fork      Tests against the real tUSD8 on a local fork of Aevum
 make check          Everything CI runs
 make anvil          Empty local chain (31337) with Aevum's EVM rules
-make fork           Local copy of Aevum testnet on 127.0.0.1:8545 (chain 440050)
+make fork           Local copy of Aevum testnet on 127.0.0.1:8555 (chain 440050)
 make deploy-local   Deploy MockUSD8 + Checkout to \`make anvil\`
 make deploy-fork    Deploy Checkout (real tUSD8) to \`make fork\`
 make deploy-aevum   Deploy Checkout to Aevum testnet (ACCOUNT=<keystore>)

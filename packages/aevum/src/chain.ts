@@ -46,7 +46,9 @@ export const aevumFork = defineChain({
   ...aevumTestnet,
   id: AEVUM_FORK_CHAIN_ID,
   name: "Aevum fork (local)",
-  rpcUrls: { default: { http: ["http://127.0.0.1:8545"] } },
+  // Not 8545: wallets often already have an anvil/Hardhat network there, and MetaMask refuses
+  // to add a second network with the same RPC URL.
+  rpcUrls: { default: { http: ["http://127.0.0.1:8555"] } },
   blockExplorers: undefined,
 });
 

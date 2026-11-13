@@ -4,6 +4,10 @@ SHELL := /bin/bash
 
 AEVUM_RPC   ?= https://rpc-test.qday.info
 LOCAL_RPC   ?= http://127.0.0.1:8545
+# Own port, so wallets can hold it next to an existing "Localhost 8545" / anvil network
+# (MetaMask refuses two networks with the same RPC URL).
+FORK_PORT   ?= 8555
+FORK_RPC    ?= http://127.0.0.1:$(FORK_PORT)
 TUSD8       := 0x456569838f1d43009A91ebA4263147Afd7233483
 # tUSD8's master minter. Only used on a local fork, where anyone can impersonate it.
 TUSD8_MM    := 0x4d4b7031D35B74215bebe33F6AF6e682Ea99d0b1
@@ -38,8 +42,8 @@ check: build test test-fork ## Everything CI runs
 anvil: ## Empty local chain (31337) with Aevum's EVM rules
 	anvil --hardfork shanghai
 
-fork: ## Local copy of Aevum testnet on 127.0.0.1:8545 (chain 440050)
-	anvil --fork-url $(AEVUM_RPC) --hardfork shanghai --chain-id $(FORK_CHAIN)
+fork: ## Local copy of Aevum testnet on 127.0.0.1:8555 (chain 440050)
+	anvil --fork-url $(AEVUM_RPC) --hardfork shanghai --chain-id $(FORK_CHAIN) --port $(FORK_PORT)
 
 deploy-local: ## Deploy MockUSD8 + Checkout to `make anvil`
 	cd contracts && forge script script/Deploy.s.sol --rpc-url $(LOCAL_RPC) --broadcast --unlocked --sender $(ANVIL_0)
@@ -48,12 +52,12 @@ deploy-local: ## Deploy MockUSD8 + Checkout to `make anvil`
 # anvil account. Otherwise the fork's contract addresses could be claimed on the real testnet by
 # anyone holding that public key.
 deploy-fork: ## Deploy Checkout (real tUSD8) to `make fork`
-	@test "$$(cast chain-id --rpc-url $(LOCAL_RPC))" = "$(FORK_CHAIN)" || (echo "This only works on 'make fork'." && exit 1)
+	@test "$$(cast chain-id --rpc-url $(FORK_RPC))" = "$(FORK_CHAIN)" || (echo "This only works on 'make fork'." && exit 1)
 	@DEPLOYER=$$(cast to-check-sum-address 0x$$(openssl rand -hex 20)); \
-	  cast rpc anvil_setBalance $$DEPLOYER 0x8ac7230489e80000 --rpc-url $(LOCAL_RPC) > /dev/null && \
-	  cast rpc anvil_impersonateAccount $$DEPLOYER --rpc-url $(LOCAL_RPC) > /dev/null && \
+	  cast rpc anvil_setBalance $$DEPLOYER 0x8ac7230489e80000 --rpc-url $(FORK_RPC) > /dev/null && \
+	  cast rpc anvil_impersonateAccount $$DEPLOYER --rpc-url $(FORK_RPC) > /dev/null && \
 	  echo "Deploying from throwaway address $$DEPLOYER (no private key exists for it)" && \
-	  cd contracts && MERCHANT=$${MERCHANT:-$(ANVIL_0)} forge script script/Deploy.s.sol --rpc-url $(LOCAL_RPC) --broadcast --unlocked --sender $$DEPLOYER
+	  cd contracts && MERCHANT=$${MERCHANT:-$(ANVIL_0)} forge script script/Deploy.s.sol --rpc-url $(FORK_RPC) --broadcast --unlocked --sender $$DEPLOYER
 
 deploy-aevum: ## Deploy Checkout to Aevum testnet. Needs ACCOUNT=<keystore name> (see README)
 	@test -n "$(ACCOUNT)" || (echo "Set ACCOUNT=<name>. Create one with: cast wallet import <name> --interactive" && exit 1)
@@ -67,13 +71,13 @@ mint: ## `make anvil` only: mint AMOUNT MockUSD8 to TO. Needs CHECKOUT=<address>
 
 deal: ## `make fork` only: give TO AMOUNT tUSD8 and 10 tQDAY for gas
 	@test -n "$(TO)" || (echo "Usage: make deal TO=0x... [AMOUNT=100]" && exit 1)
-	@test "$$(cast chain-id --rpc-url $(LOCAL_RPC))" = "$(FORK_CHAIN)" || (echo "This only works on 'make fork'." && exit 1)
-	@cast rpc anvil_setBalance $(TO) 0x8ac7230489e80000 --rpc-url $(LOCAL_RPC) > /dev/null
-	@cast rpc anvil_impersonateAccount $(TUSD8_MM) --rpc-url $(LOCAL_RPC) > /dev/null
-	@cast rpc anvil_setBalance $(TUSD8_MM) 0x56BC75E2D63100000 --rpc-url $(LOCAL_RPC) > /dev/null
-	@cast send $(TUSD8) "configureMinter(address,uint256)" $(TUSD8_MM) 1000000000000000 --from $(TUSD8_MM) --unlocked --rpc-url $(LOCAL_RPC) > /dev/null
-	@cast send $(TUSD8) "mint(address,uint256)" $(TO) $$(( $(AMOUNT) * 1000000 )) --from $(TUSD8_MM) --unlocked --rpc-url $(LOCAL_RPC) > /dev/null
-	@echo "tUSD8 balance of $(TO): $$(cast call $(TUSD8) 'balanceOf(address)(uint256)' $(TO) --rpc-url $(LOCAL_RPC))"
+	@test "$$(cast chain-id --rpc-url $(FORK_RPC))" = "$(FORK_CHAIN)" || (echo "This only works on 'make fork'." && exit 1)
+	@cast rpc anvil_setBalance $(TO) 0x8ac7230489e80000 --rpc-url $(FORK_RPC) > /dev/null
+	@cast rpc anvil_impersonateAccount $(TUSD8_MM) --rpc-url $(FORK_RPC) > /dev/null
+	@cast rpc anvil_setBalance $(TUSD8_MM) 0x56BC75E2D63100000 --rpc-url $(FORK_RPC) > /dev/null
+	@cast send $(TUSD8) "configureMinter(address,uint256)" $(TUSD8_MM) 1000000000000000 --from $(TUSD8_MM) --unlocked --rpc-url $(FORK_RPC) > /dev/null
+	@cast send $(TUSD8) "mint(address,uint256)" $(TO) $$(( $(AMOUNT) * 1000000 )) --from $(TUSD8_MM) --unlocked --rpc-url $(FORK_RPC) > /dev/null
+	@echo "tUSD8 balance of $(TO): $$(cast call $(TUSD8) 'balanceOf(address)(uint256)' $(TO) --rpc-url $(FORK_RPC))"
 
 dev: ## Start the web app on http://localhost:3000
 	pnpm dev

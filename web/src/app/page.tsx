@@ -2,7 +2,7 @@
 
 import { links, TUSD8_ADDRESS, erc20Abi } from "@aevum-kit/aevum";
 import { formatEther, formatUnits } from "viem";
-import { useAccount, useBalance, useBytecode, useReadContract, useSwitchChain } from "wagmi";
+import { useAccount, useBalance, useBytecode, useReadContract } from "wagmi";
 import { CheckIcon, CrossIcon, WarnIcon } from "@/components/Icons";
 import { useToken } from "@/components/useToken";
 import { useNetwork } from "@/lib/network";
@@ -20,12 +20,11 @@ interface Check {
 const DISCORD_FAUCET = "Run /faucet <your address> in #faucet on the QDay Discord (1 tQDAY + 5 tUSD8, once).";
 
 export default function SetupPage() {
-  const { net } = useNetwork();
+  const { net, select } = useNetwork();
   const appChain = net.chain;
   const chainMode = net.key;
   const checkoutAddress = net.checkout;
   const { address, isConnected, chainId, connector } = useAccount();
-  const { switchChain } = useSwitchChain();
   const onChain = isConnected && chainId === appChain.id;
   const token = useToken();
 
@@ -56,7 +55,7 @@ export default function SetupPage() {
             status: "bad",
             value: `chain ${chainId}`,
             detail: `Switch to ${appChain.name} (${appChain.id}). Your wallet will offer to add it.`,
-            action: { label: "Switch network", onClick: () => switchChain({ chainId: appChain.id }) },
+            action: { label: "Switch network", onClick: () => select(net.key) },
           },
     !onChain || gasValue === undefined
       ? { title: `Gas (${appChain.nativeCurrency.symbol})`, status: "idle", value: "—", detail: "Pays for transactions. Gasless checkout doesn't need it." }
@@ -155,7 +154,7 @@ export default function SetupPage() {
               <dd>shanghai</dd>
             </dl>
             {isConnected && !onChain && (
-              <button type="button" className="btn secondary block" style={{ marginTop: 16 }} onClick={() => switchChain({ chainId: appChain.id })}>
+              <button type="button" className="btn secondary block" style={{ marginTop: 16 }} onClick={() => select(net.key)}>
                 Add {appChain.name} to wallet
               </button>
             )}

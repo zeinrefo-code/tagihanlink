@@ -3,7 +3,7 @@
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useAccount, useSwitchChain } from "wagmi";
+import { useAccount } from "wagmi";
 import { networks } from "@/lib/env";
 import { useNetwork } from "@/lib/network";
 
@@ -17,9 +17,8 @@ const links = [
 export function Header() {
   const pathname = usePathname();
   const { isConnected, chainId } = useAccount();
-  const { switchChain, isPending } = useSwitchChain();
-  const { net, select } = useNetwork();
-  const wrongNetwork = isConnected && chainId !== net.chain.id;
+  const { net, select, switchingTo, switchError } = useNetwork();
+  const wrongNetwork = isConnected && chainId !== net.chain.id && !switchingTo;
 
   return (
     <>
@@ -48,6 +47,7 @@ export function Header() {
                     type="button"
                     role="radio"
                     aria-checked={n.key === net.key}
+                    disabled={Boolean(switchingTo)}
                     title={`${n.chain.name} · chain ${n.chain.id}`}
                     onClick={() => select(n.key)}
                   >
@@ -61,14 +61,31 @@ export function Header() {
           </div>
         </div>
       </header>
+      {switchingTo && (
+        <div className="banner info" role="status">
+          <div className="shell">
+            <span>
+              Confirm the switch to <strong>{switchingTo.chain.name}</strong> in your wallet. If no window opened, click the wallet icon in your
+              browser toolbar.
+            </span>
+          </div>
+        </div>
+      )}
+      {switchError && !switchingTo && (
+        <div className="banner" role="alert">
+          <div className="shell">
+            <span>{switchError}</span>
+          </div>
+        </div>
+      )}
       {wrongNetwork && (
         <div className="banner" role="alert">
           <div className="shell">
             <span>
               Your wallet is on another network. This app is set to <strong>{net.chain.name} ({net.chain.id})</strong>.
             </span>
-            <button type="button" className="btn warn small" disabled={isPending} onClick={() => switchChain({ chainId: net.chain.id })}>
-              {isPending ? "Check your wallet…" : "Switch network"}
+            <button type="button" className="btn warn small" onClick={() => select(net.key)}>
+              Switch network
             </button>
           </div>
         </div>
