@@ -19,6 +19,7 @@ Fork it, rename `Checkout` into whatever you're building (an invoice, a ticket, 
 - [Network details](#network-details)
 - [Get test tokens](#get-test-tokens)
 - [Deploy to Aevum testnet](#deploy-to-aevum-testnet)
+- [Deploy the web app to Vercel](#deploy-the-web-app-to-vercel)
 - [How the checkout works](#how-the-checkout-works)
 - [Things that differ from Ethereum](#things-that-differ-from-ethereum)
 - [Project layout](#project-layout)
@@ -108,7 +109,7 @@ make deploy-aevum ACCOUNT=aevum-deployer          # uses real tUSD8; MERCHANT de
 
 Then set `NEXT_PUBLIC_CHECKOUT_AEVUM` in `web/.env.local` and add `aevum` to `NEXT_PUBLIC_NETWORKS`.
 
-**Putting the web app online:** set `NEXT_PUBLIC_NETWORKS=aevum` only. With `fork` or `local` in the list, visitors are offered a "Local fork" that points at *their own* 127.0.0.1. Give the relayer its own fresh wallet with a little tQDAY, and read the relayer notes in [How the checkout works](#how-the-checkout-works).
+**Putting the web app online:** see [Deploy the web app to Vercel](#deploy-the-web-app-to-vercel). The same settings apply to any other host.
 
 > Use a wallet made only for testing. Never paste a private key into chat, an issue, or a committed file.
 
@@ -118,6 +119,35 @@ Then set `NEXT_PUBLIC_CHECKOUT_AEVUM` in `web/.env.local` and add `aevum` to `NE
 forge verify-contract <address> src/Checkout.sol:Checkout --chain-id 44005 \
   --verifier blockscout --verifier-url https://explorer-test.qday.info/api/
 ```
+
+---
+
+## Deploy the web app to Vercel
+
+Deploy your contract first ([above](#deploy-to-aevum-testnet)), then:
+
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fqday-io%2Faevum-starter-kit&root-directory=web&project-name=aevum-starter-kit&repository-name=aevum-starter-kit&env=NEXT_PUBLIC_NETWORKS%2CNEXT_PUBLIC_CHECKOUT_AEVUM%2CTRUSTED_IP_HEADER&envDefaults=%7B%22NEXT_PUBLIC_NETWORKS%22%3A%22aevum%22%2C%22TRUSTED_IP_HEADER%22%3A%22x-vercel-forwarded-for%22%7D&envDescription=Your%20Checkout%20address%20from%20%60make%20deploy-aevum%60.%20Add%20RELAYER_PRIVATE_KEY%20later%20in%20Project%20Settings%20to%20turn%20on%20gasless%20checkout.&envLink=https%3A%2F%2Fgithub.com%2Fqday-io%2Faevum-starter-kit%23deploy-the-web-app-to-vercel)
+
+The button copies this repo into your GitHub account and creates a Vercel project with **Root Directory** `web`. It asks for:
+
+| Variable | Value |
+|---|---|
+| `NEXT_PUBLIC_NETWORKS` | `aevum` (prefilled). Keep it to `aevum` online: with `fork` or `local`, visitors get a "Local fork" option that points at *their own* 127.0.0.1. |
+| `NEXT_PUBLIC_CHECKOUT_AEVUM` | Your Checkout address from `make deploy-aevum`. |
+| `TRUSTED_IP_HEADER` | `x-vercel-forwarded-for` (prefilled). The relayer rate-limits on this header, which Vercel sets and visitors can't fake. |
+
+Optional, in **Project Settings → Environment Variables** (then redeploy):
+
+| Variable | Value |
+|---|---|
+| `RELAYER_PRIVATE_KEY` | Turns on gasless checkout. A **fresh** wallet with a little tQDAY, never one that holds anything else, and never an anvil key (the relayer refuses those on Aevum). Mark it Sensitive. |
+| `NEXT_PUBLIC_DEPLOY_BLOCK_AEVUM` | Your deploy block. The Activity page starts scanning there. |
+| `NEXT_PUBLIC_WC_PROJECT_ID` | Enables WalletConnect (mobile wallets). Free at [cloud.reown.com](https://cloud.reown.com). |
+| `NEXT_PUBLIC_REPO_URL` | Your repo, for the Docs page's Source link. |
+
+Doing it by hand instead: **Add New → Project**, import your repo, set **Root Directory** to `web`, add the variables above, and deploy. Keep the whole repo connected (not just `web/`): the app imports `packages/aevum` through the pnpm workspace, and Vercel reads `pnpm-lock.yaml` at the repo root.
+
+> **The relayer's limits live in memory.** On Vercel each function instance has its own copy, so they slow down an attacker but don't stop one. Keep only a little tQDAY in the relayer, and move the limits to a shared store (for example Upstash Redis) if your app gets real traffic.
 
 ---
 
