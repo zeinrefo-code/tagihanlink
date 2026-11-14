@@ -6,7 +6,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { parseUnits, type Hash, type Hex } from "viem";
 import { useAccount, useConfig, useReadContract } from "wagmi";
-import { readContract, signTypedData, waitForTransactionReceipt, writeContract } from "wagmi/actions";
+import { readContract, signTypedData, simulateContract, waitForTransactionReceipt, writeContract } from "wagmi/actions";
 import { CheckIcon } from "@/components/Icons";
 import { useToken } from "@/components/useToken";
 import { useNetwork } from "@/lib/network";
@@ -72,6 +72,8 @@ export default function CheckoutPage() {
   const busy = phase === "working";
 
   function reset(nextMode = mode) {
+    // A paid order can't be paid again (Checkout reverts with AlreadyPaid), so start a fresh one.
+    if (phase === "done") setOrderId(newOrderId());
     setMode(nextMode);
     setStep(0);
     setPhase("idle");
@@ -80,8 +82,16 @@ export default function CheckoutPage() {
     setBlock(null);
   }
 
+  /** Stop before any signature or gas is spent if this order was already paid. */
+  async function assertUnpaid(id: Hex) {
+    if (!checkoutAddress) return;
+    const paid = await readContract(config, { address: checkoutAddress, abi: checkoutAbi, functionName: "isPaid", args: [id], chainId: appChain.id });
+    if (paid) throw new Error("This order is already paid. Start a new order.");
+  }
+
   async function payGasless() {
     if (!address || !checkoutAddress || !token.address || !orderId) return;
+    await assertUnpaid(orderId);
     // 1. Sign. The nonce comes from the contract and ties this signature to this order.
     const nonce = await readContract(config, { address: checkoutAddress, abi: checkoutAbi, functionName: "authorizationNonce", args: [orderId], chainId: appChain.id });
     const { validAfter, validBefore } = authorizationWindow(600);
@@ -113,6 +123,7 @@ export default function CheckoutPage() {
 
   async function payStandard() {
     if (!address || !checkoutAddress || !token.address || !orderId) return;
+    await assertUnpaid(orderId);
     // 1. Approve exactly the order total, never an unlimited amount.
     const allowance = await readContract(config, { address: token.address, abi: erc20Abi, functionName: "allowance", args: [address, checkoutAddress], chainId: appChain.id });
     if (allowance < amount) {
@@ -121,7 +132,9 @@ export default function CheckoutPage() {
     }
     setStep(1);
     // 2. Pay.
-    const hash = await writeContract(config, { address: checkoutAddress, abi: checkoutAbi, functionName: "pay", args: [orderId, amount], chainId: appChain.id });
+    // Simulate first: a revert shows up here with its reason, before the wallet asks for gas.
+    const { request } = await simulateContract(config, { account: address, address: checkoutAddress, abi: checkoutAbi, functionName: "pay", args: [orderId, amount], chainId: appChain.id });
+    const hash = await writeContract(config, request);
     setTxHash(hash);
     setStep(2);
     return hash;
@@ -129,7 +142,6 @@ export default function CheckoutPage() {
 
   async function onPay() {
     if (phase === "done") {
-      setOrderId(newOrderId());
       reset();
       return;
     }
