@@ -27,7 +27,7 @@ const { validAfter, validBefore } = authorizationWindow(600);
 const signature = await buyer.signTypedData(
   checkoutTypedData(chain.id, token, { from: buyer.address, to: checkout, value: amount, validAfter, validBefore, nonce }),
 );
-const { v, r, s } = parseSignature(signature);
+const { v, r, s, yParity } = parseSignature(signature);
 console.log(`Buyer ${buyer.address} signed ${formatUnits(amount, decimals)} for order ${orderId}`);
 
 // 2. Relayer submits. Simulate first so a bad signature fails here, not on chain.
@@ -36,7 +36,7 @@ const call = {
   address: checkout,
   abi: checkoutAbi,
   functionName: "payWithAuthorization",
-  args: [orderId, buyer.address, amount, validAfter, validBefore, Number(v ?? 27n), r, s],
+  args: [orderId, buyer.address, amount, validAfter, validBefore, v !== undefined ? Number(v) : 27 + (yParity ?? 0), r, s],
 } as const;
 await client.simulateContract(call);
 const hash = await relayer.writeContract({ ...call, type: "legacy" });

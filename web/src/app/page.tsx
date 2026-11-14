@@ -78,7 +78,7 @@ export default function SetupPage() {
         ? { title: `Gas (${appChain.nativeCurrency.symbol})`, status: "ok", value: `${Number(formatEther(gasValue)).toFixed(4)} ${appChain.nativeCurrency.symbol}`, detail: chainMode === "fork" ? FORK_COPY : "1 tQDAY covers hundreds of contract calls at 1 gwei." }
         : chainMode === "aevum"
           ? { title: "Gas (tQDAY)", status: "warn", value: "0 tQDAY", detail: DISCORD_FAUCET, action: { label: "Open web faucet", href: links.faucetWeb } }
-          : { title: "Gas", status: "warn", value: "0", detail: "Use an anvil account (see README › Local development)." },
+          : { title: "Gas", status: "warn", value: "0", detail: chainMode === "fork" ? "Give yourself tQDAY and tUSD8 with `make deal TO=<address>`." : "Import one of anvil's default accounts into your wallet (local chain only)." },
     !onChain || tokenValue === undefined
       ? { title: `${token.symbol} balance`, status: "idle", value: "—", detail: "The stablecoin the checkout uses (6 decimals)." }
       : tokenValue > 0n

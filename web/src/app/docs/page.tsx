@@ -88,7 +88,7 @@ export default function DocsPage() {
                   <tr><td><strong>Invoice Payments</strong></td><td>An order id is an invoice id. <code>Checkout.paymentOf(orderId)</code> tells you if it&apos;s paid; the <code>Paid</code> event is the receipt.</td></tr>
                   <tr><td><strong>Payroll and Vesting</strong></td><td>Reuse the tUSD8 setup, the chunked event reader and the relayer. Streaming and schedules are yours to build.</td></tr>
                   <tr><td><strong>Crowdfunding</strong></td><td>Pledges are payments to a campaign contract. Start from <code>Checkout.sol</code> and add goals, deadlines and refunds.</td></tr>
-                  <tr><td><strong>Confirmation of Payee</strong></td><td>Check who you&apos;re paying before you sign. Aevum testnet has an ERC-8004-style identity registry you can look up.</td></tr>
+                  <tr><td><strong>Confirmation of Payee</strong></td><td>Check who you&apos;re paying before you sign. Aevum testnet has an ERC-8004-style identity registry, <code className="wrap">0xF45E7f39Caba1d2055f613970575a7e7069636Be</code> (found on chain, not in QDay&apos;s docs yet).</td></tr>
                   <tr><td><strong>Decentralized Payments</strong></td><td>Gasless checkout (EIP-3009 + relayer) works today. Account abstraction is on its way to this kit.</td></tr>
                   <tr><td><strong>Digital Ownership</strong></td><td>Pay in tUSD8, then mint or transfer the asset in the same contract call.</td></tr>
                   <tr><td><strong>Native AI Assistants</strong></td><td><code>examples/pay-gasless</code> shows a script that signs and pays without a browser, the starting point for an agent.</td></tr>
@@ -142,7 +142,7 @@ make dev
               </p>
             </div>
             <p>
-              Any of anvil&apos;s default accounts works as a local relayer. Those keys are public: use them on local chains only. Want an empty
+              Any of anvil&apos;s default accounts works as a local relayer. Those keys are public, so the relayer refuses them on Aevum testnet: give it a fresh test wallet there. Want an empty
               chain instead? <code>make anvil</code> + <code>make deploy-local</code> deploys a <code>MockUSD8</code> that anyone can mint with{" "}
               <code>make mint</code>.
             </p>
@@ -223,6 +223,11 @@ MERCHANT=0x... make deploy-aevum ACCOUNT=aevum-deployer
               Then set <code>NEXT_PUBLIC_CHECKOUT_AEVUM</code> in <code>web/.env.local</code> and add <code>aevum</code> to{" "}
               <code>NEXT_PUBLIC_NETWORKS</code>.
             </p>
+            <p>
+              <strong>Putting the app online:</strong> set <code>NEXT_PUBLIC_NETWORKS=aevum</code> only. With <code>fork</code> or{" "}
+              <code>local</code> listed, visitors get a &quot;Local fork&quot; option that points at their own 127.0.0.1. Give the relayer its own
+              wallet with a little tQDAY, and read the relayer notes in <a href="#checkout">How the checkout works</a>.
+            </p>
             <div className="notice bad">
               <strong>Use a wallet made only for testing.</strong>
               <span>Never paste a private key into chat, an issue, or a committed file.</span>
@@ -271,14 +276,31 @@ relayer → payWithAuthorization(...) → Checkout
                 nobody can front-run the signature into a plain transfer.
               </li>
               <li>
-                The relayer (<code>web/src/app/api/relay/route.ts</code>) only calls <code>payWithAuthorization</code> on your Checkout, simulates
-                first, caps the signature window at 1 hour, and rate-limits per IP.
-              </li>
-              <li>
-                The contract doesn&apos;t know prices. Your app decides what an order costs and checks <code>paymentOf(orderId)</code> before
-                delivering.
+                The contract doesn&apos;t know prices. Your app decides what an order costs (<code>priceOf</code> in{" "}
+                <code>web/src/lib/order.ts</code>) and checks <code>paymentOf(orderId)</code> <strong>and its amount</strong> before delivering.
               </li>
             </ul>
+            <p>
+              The relayer (<code>web/src/app/api/relay/route.ts</code>) pays gas for anyone who calls it, so it has rails. Keep them:
+            </p>
+            <ul>
+              <li>Only <code>payWithAuthorization</code> on your Checkout, nothing else.</li>
+              <li>Only the price your app set for that order. Otherwise anyone could burn your gas with 0.000001 tUSD8 payments.</li>
+              <li>Skips orders already paid or already being submitted, and simulates before sending.</li>
+              <li>Refuses anvil&apos;s public keys on a real network, caps the signature window at 1 hour, rate-limits per IP and per payer, and stops at a daily cap.</li>
+              <li>
+                <strong>The limits live in memory.</strong> Fine for <code>next start</code> on one server; on serverless hosts move them to a shared
+                store (Redis, your database). Set <code>TRUSTED_IP_HEADER</code> to your host&apos;s client-IP header.
+              </li>
+            </ul>
+            <div className="notice warn">
+              <strong>Anyone can pay any order, with any amount.</strong>
+              <span>
+                <code>pay(orderId, 1)</code> marks an order as paid for 0.000001 tUSD8 and can front-run the real buyer. Never ship on{" "}
+                <code>isPaid</code> alone: compare the amount. For production, key payments by <code>keccak256(payer, orderId)</code> or have the
+                merchant sign each quote, and use unguessable order ids.
+              </span>
+            </div>
             <p>Code to read, in order:</p>
             <ol>
               <li><code>contracts/src/Checkout.sol</code></li>

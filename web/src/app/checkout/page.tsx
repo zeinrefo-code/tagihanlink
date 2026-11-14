@@ -287,7 +287,7 @@ export default function CheckoutPage() {
                       Explorer
                     </a>
                   )}
-                  <Link href={`/receipts/${orderId}?tx=${txHash}`}>View receipt</Link>
+                  <Link href={`/receipts/${orderId}?tx=${txHash}&chain=${appChain.id}`}>View receipt</Link>
                 </span>
               </div>
             </div>

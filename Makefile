@@ -65,7 +65,7 @@ deploy-aevum: ## Deploy Checkout to Aevum testnet. Needs ACCOUNT=<keystore name>
 
 mint: ## `make anvil` only: mint AMOUNT MockUSD8 to TO. Needs CHECKOUT=<address>
 	@test -n "$(TO)" -a -n "$(CHECKOUT)" || (echo "Usage: make mint TO=0x... CHECKOUT=0x... [AMOUNT=100]" && exit 1)
-	cast send $$(cast call $(CHECKOUT) "token()(address)" --rpc-url $(LOCAL_RPC)) "mint(address,uint256)" $(TO) $$(( $(AMOUNT) * 1000000 )) \
+	cast send $$(cast call $(CHECKOUT) "token()(address)" --rpc-url $(LOCAL_RPC)) "mint(address,uint256)" $(TO) $$(cast parse-units $(AMOUNT) 6) \
 	  --rpc-url $(LOCAL_RPC) --unlocked --from $(ANVIL_0) > /dev/null
 	@echo "Minted $(AMOUNT) to $(TO)."
 
@@ -76,7 +76,7 @@ deal: ## `make fork` only: give TO AMOUNT tUSD8 and 10 tQDAY for gas
 	@cast rpc anvil_impersonateAccount $(TUSD8_MM) --rpc-url $(FORK_RPC) > /dev/null
 	@cast rpc anvil_setBalance $(TUSD8_MM) 0x56BC75E2D63100000 --rpc-url $(FORK_RPC) > /dev/null
 	@cast send $(TUSD8) "configureMinter(address,uint256)" $(TUSD8_MM) 1000000000000000 --from $(TUSD8_MM) --unlocked --rpc-url $(FORK_RPC) > /dev/null
-	@cast send $(TUSD8) "mint(address,uint256)" $(TO) $$(( $(AMOUNT) * 1000000 )) --from $(TUSD8_MM) --unlocked --rpc-url $(FORK_RPC) > /dev/null
+	@cast send $(TUSD8) "mint(address,uint256)" $(TO) $$(cast parse-units $(AMOUNT) 6) --from $(TUSD8_MM) --unlocked --rpc-url $(FORK_RPC) > /dev/null
 	@echo "tUSD8 balance of $(TO): $$(cast call $(TUSD8) 'balanceOf(address)(uint256)' $(TO) --rpc-url $(FORK_RPC))"
 
 dev: ## Start the web app on http://localhost:3000

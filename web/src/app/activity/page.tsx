@@ -137,7 +137,7 @@ export default function ActivityPage() {
                       </td>
                       <td className="right num">{l.blockNumber?.toString()}</td>
                       <td style={{ display: "flex", gap: 14 }}>
-                        <Link href={`/receipts/${l.args.orderId}?tx=${l.transactionHash}`}>Receipt</Link>
+                        <Link href={`/receipts/${l.args.orderId}?tx=${l.transactionHash}&chain=${appChain.id}`}>Receipt</Link>
                         {hasExplorer && l.transactionHash && (
                           <a href={txUrl(l.transactionHash)} target="_blank" rel="noreferrer">
                             Tx

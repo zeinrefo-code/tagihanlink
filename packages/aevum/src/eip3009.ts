@@ -38,7 +38,7 @@ export function checkoutTypedData(chainId: number, token: Address, message: Chec
   };
 }
 
-/** A signature window that starts now (with a little clock slack) and lasts `seconds`. */
+/** A signature window that is valid at once (validAfter = 0, so clock drift can't reject it) and lasts `seconds`. */
 export function authorizationWindow(seconds = 600, nowMs = Date.now()) {
   const now = BigInt(Math.floor(nowMs / 1000));
   return { validAfter: 0n, validBefore: now + BigInt(seconds) };
