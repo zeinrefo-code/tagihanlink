@@ -264,3 +264,11 @@ dl.faq dd { margin: 0; color: var(--text-2); line-height: 1.65; }
 .net-dot.fork, .net-dot.local { background: var(--warn); }
 .banner.info { border-bottom-color: var(--line-info); background: var(--surface-info); color: var(--accent-text); }
 .net-switch button:disabled { cursor: wait; opacity: 0.6; }
+
+/* Pre-submit checklist on the docs page: empty boxes to tick in your head. */
+.docs-body ul.checklist { list-style: none; padding-left: 0; }
+.docs-body ul.checklist li { position: relative; padding-left: 28px; }
+.docs-body ul.checklist li::before {
+  content: ""; position: absolute; left: 0; top: 0.3em; width: 14px; height: 14px;
+  border: 1.5px solid var(--text-faint); border-radius: 4px;
+}

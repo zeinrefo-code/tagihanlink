@@ -4,7 +4,10 @@ import { repoUrl } from "@/lib/env";
 
 export const metadata: Metadata = { title: "Docs" };
 
+const HACKATHON_URL = "https://dorahacks.io/hackathon/qday/detail";
+
 const sections = [
+  { id: "challenge", label: "The challenge" },
   { id: "quickstart", label: "Quickstart" },
   { id: "network", label: "Network details" },
   { id: "tokens", label: "Get test tokens" },
@@ -13,6 +16,7 @@ const sections = [
   { id: "differences", label: "Differences from Ethereum" },
   { id: "commands", label: "Commands" },
   { id: "submitting", label: "Submitting your project" },
+  { id: "judging", label: "Judging" },
   { id: "faq", label: "FAQ" },
 ];
 
@@ -54,6 +58,48 @@ export default function DocsPage() {
         </nav>
 
         <article className="docs-body">
+          <section id="challenge">
+            <h2>Aevum Builder Challenge #1</h2>
+            <p>
+              Build a payment app with the <strong>tUSD8</strong> stablecoin on Aevum testnet. Fully online, solo or teams of 2 to 4. Every
+              line of code must be written during the build window, and every contract runs on Aevum testnet with test tokens only.
+            </p>
+            <div className="table-wrap">
+              <table className="data docs-table">
+                <tbody>
+                  <tr><th scope="row">Kickoff</th><td>16 Nov 2026, 14:00 HKT (06:00 UTC)</td></tr>
+                  <tr><th scope="row">Submission deadline</th><td>11 Dec 2026, 16:00 HKT (08:00 UTC). Late submissions aren&apos;t accepted.</td></tr>
+                  <tr><th scope="row">Judging</th><td>12 to 14 Dec 2026</td></tr>
+                  <tr><th scope="row">Winners</th><td>15 Dec 2026, 14:00 HKT (06:00 UTC)</td></tr>
+                  <tr><th scope="row">Prizes</th><td>$1,500 in USDT: 1st $800, 2nd $500, 3rd $200</td></tr>
+                  <tr><th scope="row">Submit at</th><td><a href={HACKATHON_URL} target="_blank" rel="noreferrer">dorahacks.io/hackathon/qday</a></td></tr>
+                </tbody>
+              </table>
+            </div>
+            <h3>Tracks</h3>
+            <div className="table-wrap">
+              <table className="data docs-table wide">
+                <thead>
+                  <tr><th>Track</th><th>Where this kit helps</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td><strong>Invoice Payments</strong></td><td>An order id is an invoice id. <code>Checkout.paymentOf(orderId)</code> tells you if it&apos;s paid; the <code>Paid</code> event is the receipt.</td></tr>
+                  <tr><td><strong>Payroll and Vesting</strong></td><td>Reuse the tUSD8 setup, the chunked event reader and the relayer. Streaming and schedules are yours to build.</td></tr>
+                  <tr><td><strong>Crowdfunding</strong></td><td>Pledges are payments to a campaign contract. Start from <code>Checkout.sol</code> and add goals, deadlines and refunds.</td></tr>
+                  <tr><td><strong>Confirmation of Payee</strong></td><td>Check who you&apos;re paying before you sign. Aevum testnet has an ERC-8004-style identity registry you can look up.</td></tr>
+                  <tr><td><strong>Decentralized Payments</strong></td><td>Gasless checkout (EIP-3009 + relayer) works today. Account abstraction is on its way to this kit.</td></tr>
+                  <tr><td><strong>Digital Ownership</strong></td><td>Pay in tUSD8, then mint or transfer the asset in the same contract call.</td></tr>
+                  <tr><td><strong>Native AI Assistants</strong></td><td><code>examples/pay-gasless</code> shows a script that signs and pays without a browser, the starting point for an agent.</td></tr>
+                  <tr><td><strong>Other business payment tools</strong></td><td>Anything that moves tUSD8 on Aevum for a real business need.</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <p>
+              Full rules: <a href={HACKATHON_URL} target="_blank" rel="noreferrer">the DoraHacks challenge page</a>. They win over anything on
+              this page.
+            </p>
+          </section>
+
           <section id="quickstart">
             <h2>Quickstart</h2>
             <p>
@@ -291,14 +337,51 @@ pnpm example read-payments    # every Paid event, 1,000 blocks at a time
 
           <section id="submitting">
             <h2>Submitting your project</h2>
+            <p>What the challenge asks for:</p>
+            <ul>
+              <li><strong>Open-source code:</strong> a public GitHub repository with clean, readable code.</li>
+              <li><strong>Aevum integration:</strong> evidence that your app runs on QDay infrastructure, for example your contracts, ERC-8004 identities or QDay dapps.</li>
+              <li><strong>Live deployment:</strong> a working demo, a prototype interface, or a Docker image that runs the app.</li>
+              <li><strong>Documentation:</strong> the problem you solve, your architecture, the core workflows, and the technologies you used.</li>
+              <li><strong>Demo:</strong> the top 5 projects present a 3 to 5 minute live walkthrough on a video call.</li>
+            </ul>
             <p>Make it easy for judges to check your on-chain activity:</p>
             <ul>
               <li>Contract addresses on Aevum testnet (<code>44005</code>), with explorer links.</li>
               <li>A link to the exact commit you deployed.</li>
               <li>A few transaction hashes that show your app working. The receipt and activity pages show them.</li>
-              <li>A short demo video or a live URL.</li>
             </ul>
-            <p>Read the official rules on the DoraHacks challenge page. They win over anything here.</p>
+            <h3>Before you submit</h3>
+            <ul className="checklist">
+              <li>Submitted before the deadline. Submit early; the portal gets slow at the end.</li>
+              <li>The repo is public and opens in a logged-out browser.</li>
+              <li>No private keys, <code>.env</code> files or API keys in the repo or its commit history.</li>
+              <li>A stranger can run the project from your README.</li>
+              <li>Contracts and payments are on Aevum testnet, not another network.</li>
+              <li>The demo link works without logging in.</li>
+              <li>Every team member is listed and registered.</li>
+            </ul>
+          </section>
+
+          <section id="judging">
+            <h2>Judging</h2>
+            <p>What judges look at. The DoraHacks page has the current list and weights.</p>
+            <div className="table-wrap">
+              <table className="data docs-table wide">
+                <thead>
+                  <tr><th>Criterion</th><th>What it means</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td><strong>Innovation</strong></td><td>A new idea, architecture or business model that goes beyond templates (this kit included). Creative use of agents and agentic payments.</td></tr>
+                  <tr><td><strong>Technical quality</strong></td><td>Deep, correct platform use (smart accounts, scoped sessions, budgets, expiry). Tested code that handles retries, idempotency and async failures.</td></tr>
+                  <tr><td><strong>Real-world utility</strong></td><td>A real problem for a clear audience that would pay. A believable path to merchants, agents and mainnet.</td></tr>
+                  <tr><td><strong>User experience</strong></td><td>Fast onboarding, clear status and error messages, works across devices. A pitch that explains the problem.</td></tr>
+                  <tr><td><strong>Demo</strong></td><td>A reliable testnet demo with live on-chain activity, showing the main flow and how failures are handled.</td></tr>
+                  <tr><td><strong>Documentation</strong></td><td>Setup steps, an architecture diagram, API references, integrations, assumptions, limitations and a roadmap.</td></tr>
+                  <tr><td><strong>Safety and controls</strong></td><td>Least-privilege sessions, budget caps, safe key storage, injection protection, audit trails, verifiable receipts, easy revoke.</td></tr>
+                </tbody>
+              </table>
+            </div>
           </section>
 
           <section id="faq">
@@ -314,8 +397,14 @@ pnpm example read-payments    # every Paid event, 1,000 blocks at a time
               <dd>You compiled for Cancun. See <a href="#differences">Differences from Ethereum</a>.</dd>
               <dt>eth_getLogs errors on a big range.</dt>
               <dd>Split it into 1,000-block chunks with <code>getLogsChunked</code>.</dd>
+              <dt>Can I deploy to Sepolia or another testnet?</dt>
+              <dd>Not for the challenge. Contracts and payments must be on Aevum testnet (<code>44005</code>).</dd>
+              <dt>Can I pay gas in tUSD8?</dt>
+              <dd>Not out of the box: there&apos;s no public paymaster that takes tUSD8 yet. Gasless checkout (a relayer pays the tQDAY) is the way to spare users gas today.</dd>
+              <dt>Which explorer?</dt>
+              <dd><a href={links.explorer} target="_blank" rel="noreferrer">{links.explorer.replace("https://", "")}</a>. explorer.qday.io is mainnet.</dd>
               <dt>Where do I ask for help?</dt>
-              <dd>In the QDay Discord&apos;s Builder Challenge channels.</dd>
+              <dd>In the QDay Discord&apos;s Builder Challenge channels. The team answers Monday to Friday, 10:00 to 18:00 HKT (02:00 to 10:00 UTC).</dd>
             </dl>
           </section>
 
