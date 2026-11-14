@@ -17,7 +17,7 @@ interface Check {
   action?: { label: string; href?: string; onClick?: () => void };
 }
 
-const DISCORD_FAUCET = "Run /faucet <your address> in #faucet on the QDay Discord (1 tQDAY + 5 tUSD8, once).";
+const DISCORD_FAUCET = "Verify in the QDay Discord, then run /faucet <your address> (1 tQDAY + 5 tUSD8, once). Docs › Get test tokens has the steps.";
 
 // Shown on a fork, where balances surprise people: they are the real testnet balances.
 const FORK_COPY = "Copied from Aevum testnet when the fork started. Spending it here doesn't touch the real testnet.";

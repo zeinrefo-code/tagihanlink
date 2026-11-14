@@ -5,6 +5,7 @@ import { repoUrl } from "@/lib/env";
 export const metadata: Metadata = { title: "Docs" };
 
 const HACKATHON_URL = "https://dorahacks.io/hackathon/qday/detail";
+const DISCORD_URL = "https://discord.gg/bYPhjmrSfK";
 
 const sections = [
   { id: "challenge", label: "The challenge" },
@@ -72,6 +73,7 @@ export default function DocsPage() {
                   <tr><th scope="row">Judging</th><td>12 to 14 Dec 2026</td></tr>
                   <tr><th scope="row">Winners</th><td>15 Dec 2026, 14:00 HKT (06:00 UTC)</td></tr>
                   <tr><th scope="row">Prizes</th><td>$1,500 in USDT: 1st $800, 2nd $500, 3rd $200</td></tr>
+                  <tr><th scope="row">Help</th><td><a href={DISCORD_URL} target="_blank" rel="noreferrer">QDay Discord</a>, Monday to Friday, 10:00 to 18:00 HKT</td></tr>
                   <tr><th scope="row">Submit at</th><td><a href={HACKATHON_URL} target="_blank" rel="noreferrer">dorahacks.io/hackathon/qday</a></td></tr>
                 </tbody>
               </table>
@@ -171,8 +173,8 @@ make dev
             <h2>Get test tokens</h2>
             <ul>
               <li>
-                <strong>Discord faucet (Builder Challenge participants):</strong> in the QDay Discord, verify, then run{" "}
-                <code>/faucet &lt;your address&gt;</code> in <code>#faucet</code>. You get 1 tQDAY + 5 tUSD8, once per Discord account.
+                <strong>Discord faucet (for challenge participants, recommended):</strong> enough to deploy and pay, and no mainnet balance
+                needed. See below.
               </li>
               <li>
                 <strong>Web faucet:</strong>{" "}
@@ -183,6 +185,28 @@ make dev
               </li>
             </ul>
             <p>1 tQDAY is plenty: deploying <code>Checkout</code> costs well under 0.01 tQDAY.</p>
+            <h3>Discord faucet</h3>
+            <ol>
+              <li>
+                Join the <a href={DISCORD_URL} target="_blank" rel="noreferrer">QDay Discord</a>.
+              </li>
+              <li>
+                In <code>#verify</code>, react with ✅ to get the <strong>Verified</strong> role.
+              </li>
+              <li>
+                Type <code>/faucet</code>, paste your wallet address, and send. The bot answers privately (only you see it) with the
+                transaction links.
+              </li>
+            </ol>
+            <ul>
+              <li>You get <strong>1 tQDAY + 5 tUSD8</strong>, usually within a few seconds.</li>
+              <li>
+                <strong>Once per Discord account and once per address.</strong> Use the address you&apos;ll build with. Running out? Ask in
+                the help channel.
+              </li>
+              <li>It only works during the challenge, for Discord accounts that aren&apos;t brand new. If you can&apos;t claim, the bot says why.</li>
+              <li>Unlike the web faucet, it doesn&apos;t check for an Ethereum mainnet balance, so a fresh testnet-only wallet works.</li>
+            </ul>
           </section>
 
           <section id="deploy">
@@ -404,7 +428,12 @@ pnpm example read-payments    # every Paid event, 1,000 blocks at a time
               <dt>Which explorer?</dt>
               <dd><a href={links.explorer} target="_blank" rel="noreferrer">{links.explorer.replace("https://", "")}</a>. explorer.qday.io is mainnet.</dd>
               <dt>Where do I ask for help?</dt>
-              <dd>In the QDay Discord&apos;s Builder Challenge channels. The team answers Monday to Friday, 10:00 to 18:00 HKT (02:00 to 10:00 UTC).</dd>
+              <dd>
+                In the <a href={DISCORD_URL} target="_blank" rel="noreferrer">QDay Discord</a>&apos;s Builder Challenge channels (verify first
+                to see them). The team answers Monday to Friday, 10:00 to 18:00 HKT (02:00 to 10:00 UTC).
+              </dd>
+              <dt>The web faucet says &quot;address not eligible&quot;.</dt>
+              <dd>The web faucet only pays addresses that hold a little ETH, USDT or USDC on Ethereum mainnet. Use the Discord faucet instead.</dd>
             </dl>
           </section>
 

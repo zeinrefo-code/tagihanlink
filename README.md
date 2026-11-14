@@ -86,7 +86,7 @@ All of this is in [`packages/aevum/src/chain.ts`](packages/aevum/src/chain.ts) a
 
 ## Get test tokens
 
-- **Discord faucet (for Builder Challenge participants):** in the QDay Discord, verify, then run `/faucet <your address>` in `#faucet`. You get **1 tQDAY + 5 tUSD8**, once per Discord account.
+- **Discord faucet (for Builder Challenge participants):** join the [QDay Discord](https://discord.gg/bYPhjmrSfK), react ✅ in `#verify`, then run `/faucet <your address>`. You get **1 tQDAY + 5 tUSD8**, once per Discord account and once per address. No Ethereum mainnet balance needed.
 - **Web faucet:** https://faucet.qday.info. Check the page for its rules.
 - **Local fork:** `make deal TO=<address>` for unlimited test balances. Nothing leaves your machine.
 
@@ -243,7 +243,7 @@ Read the official rules on the DoraHacks challenge page. They win over anything 
 
 **`eth_getLogs` errors on a big range.** Split it into 1,000-block chunks with `getLogsChunked`.
 
-**Where do I ask for help?** In the QDay Discord's Builder Challenge channels.
+**Where do I ask for help?** In the [QDay Discord](https://discord.gg/bYPhjmrSfK)'s Builder Challenge channels (verify first to see them), Monday to Friday, 10:00 to 18:00 HKT.
 
 ---
 
