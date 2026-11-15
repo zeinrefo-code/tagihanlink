@@ -231,6 +231,7 @@ web/                  Next.js app (wagmi + RainbowKit)
   src/app/globals.css     every color and font; edit to rebrand
 examples/             runnable TypeScript scripts
 tools/check-shanghai.mjs  fails the build on Cancun-only opcodes
+LICENSE, NOTICE.md     MIT license and third-party licenses
 ```
 
 ---
@@ -274,6 +275,17 @@ Make it easy for judges to check your on-chain activity:
 
 Read the official rules on the DoraHacks challenge page. They win over anything here.
 
+### Licenses and credit
+
+The organizers confirmed that boilerplate, scaffolding and templates are allowed, as long as their license permits the use. This kit is MIT licensed, so you can build on it.
+
+- Put a permissive open-source license on your repo, usually MIT or Apache 2.0.
+- If you start from this kit, keep its `LICENSE` file (or its copyright notice) and say so in your README, for example: "Based on Aevum Starter Kit (MIT, PQA Labs)".
+- Keep the original copyright and license headers in any file you copy from another project.
+- Put a short comment above any code snippet you borrow, naming the source repo, author and license.
+- List your third-party dependencies and their licenses in your README or a `NOTICE` file. [NOTICE.md](NOTICE.md) shows one way to do it.
+- If you copy a whole directory or library, keep its original `LICENSE` file in that folder.
+
 ---
 
 ## FAQ
@@ -294,4 +306,4 @@ Read the official rules on the DoraHacks challenge page. They win over anything 
 
 ---
 
-MIT licensed. See [LICENSE](LICENSE).
+MIT licensed, © 2026 PQA Labs. See [LICENSE](LICENSE). Third-party licenses are listed in [NOTICE.md](NOTICE.md).

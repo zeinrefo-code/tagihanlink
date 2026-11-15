@@ -62,8 +62,10 @@ export default function DocsPage() {
           <section id="challenge">
             <h2>Aevum Builder Challenge #1</h2>
             <p>
-              Build a payment app with the <strong>tUSD8</strong> stablecoin on Aevum testnet. Fully online, solo or teams of 2 to 4. Every
-              line of code must be written during the build window, and every contract runs on Aevum testnet with test tokens only.
+              Build a payment app with the <strong>tUSD8</strong> stablecoin on Aevum testnet. Fully online, solo or teams of 2 to 4. Your
+              project is built during the build window, and every contract runs on Aevum testnet with test tokens only. Open-source
+              boilerplate, templates and this kit are allowed when their license permits it. See{" "}
+              <a href="#licenses">Licenses and credit</a>.
             </p>
             <div className="table-wrap">
               <table className="data docs-table">
@@ -406,6 +408,26 @@ pnpm example read-payments    # every Paid event, 1,000 blocks at a time
               <li>Contracts and payments are on Aevum testnet, not another network.</li>
               <li>The demo link works without logging in.</li>
               <li>Every team member is listed and registered.</li>
+              <li>The repo has an open-source license, and every template or snippet you reused is credited.</li>
+            </ul>
+            <h3 id="licenses">Licenses and credit</h3>
+            <p>
+              The organizers confirmed that boilerplate, scaffolding and templates are allowed, as long as their license permits the use.
+              This kit is MIT licensed, so you can build on it.
+            </p>
+            <ul>
+              <li>Put a permissive open-source license on your repo, usually MIT or Apache 2.0.</li>
+              <li>
+                If you start from this kit, keep its <code>LICENSE</code> file (or its copyright notice) and say so in your README, for example:
+                &quot;Based on Aevum Starter Kit (MIT, PQA Labs)&quot;.
+              </li>
+              <li>Keep the original copyright and license headers in any file you copy from another project.</li>
+              <li>Put a short comment above any code snippet you borrow, naming the source repo, author and license.</li>
+              <li>
+                List your third-party dependencies and their licenses in your README or a <code>NOTICE</code> file. This kit&apos;s{" "}
+                <a href={`${repoUrl}/blob/main/NOTICE.md`} target="_blank" rel="noreferrer">NOTICE.md</a> shows one way to do it.
+              </li>
+              <li>If you copy a whole directory or library, keep its original <code>LICENSE</code> file in that folder.</li>
             </ul>
           </section>
 
@@ -461,7 +483,8 @@ pnpm example read-payments    # every Paid event, 1,000 blocks at a time
 
           <p className="fine">
             Source and full README: <a href={repoUrl} target="_blank" rel="noreferrer">{repoUrl.replace("https://", "")}</a>. QDay&apos;s general
-            guide: <a href={links.docs} target="_blank" rel="noreferrer">{links.docs.replace("https://", "")}</a>.
+            guide: <a href={links.docs} target="_blank" rel="noreferrer">{links.docs.replace("https://", "")}</a>. MIT licensed, © 2026 PQA
+            Labs.
           </p>
         </article>
       </div>

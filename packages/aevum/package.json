@@ -2,6 +2,7 @@
   "name": "@aevum-kit/aevum",
   "version": "0.1.0",
   "private": true,
+  "license": "MIT",
   "type": "module",
   "description": "Aevum testnet chain config, contract ABIs and helpers shared by the web app and examples.",
   "exports": {
