@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { links, TUSD8_ADDRESS } from "@aevum-kit/aevum";
+import { GitHubIcon } from "@/components/Icons";
 import { repoUrl } from "@/lib/env";
 
 export const metadata: Metadata = { title: "Docs" };
@@ -41,6 +42,10 @@ export default function DocsPage() {
             from Ethereum.
           </p>
         </div>
+        <a className="btn secondary" href={repoUrl} target="_blank" rel="noreferrer">
+          <GitHubIcon />
+          View the code on GitHub
+        </a>
       </div>
 
       <div className="notice warn">

@@ -83,6 +83,8 @@ main.shell { padding-top: 48px; padding-bottom: 72px; display: flex; flex-direct
 .nav a:hover { color: var(--text); }
 .nav a[aria-current="page"] { color: var(--text); background: #1e2129; }
 .topbar-end { display: flex; align-items: center; gap: 10px; }
+.gh-link { display: inline-flex; align-items: center; gap: 8px; min-height: 40px; padding: 8px 12px; border-radius: 8px; border: 1px solid var(--line-strong); color: var(--text-muted); text-decoration: none; font-weight: 500; }
+.gh-link:hover { color: var(--text); background: var(--surface-2); }
 
 .banner { border-bottom: 1px solid var(--warn-line); background: var(--warn-bg); color: #ffd2b0; }
 .banner .shell { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; padding-top: 12px; padding-bottom: 12px; }
