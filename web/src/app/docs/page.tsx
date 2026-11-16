@@ -206,7 +206,7 @@ make dev
                 <strong>Once per Discord account and once per address.</strong> Use the address you&apos;ll build with. Running out? Ask in
                 the help channel.
               </li>
-              <li>It only works during the challenge, for Discord accounts that aren&apos;t brand new. If you can&apos;t claim, the bot says why.</li>
+              <li>It works for Discord accounts that aren&apos;t brand new. If you can&apos;t claim, the bot says why.</li>
               <li>Unlike the web faucet, it doesn&apos;t check for an Ethereum mainnet balance, so a fresh testnet-only wallet works.</li>
             </ul>
           </section>
