@@ -463,7 +463,7 @@ pnpm example read-payments    # every Paid event, 1,000 blocks at a time
               <dt>Do I have to use Checkout?</dt>
               <dd>No. It&apos;s an example. Keep the parts you need (<code>packages/aevum</code>, the chunked log reader, the setup checker) and replace the rest.</dd>
               <dt>Can I use account abstraction?</dt>
-              <dd>Aevum has an ERC-4337 bundler (EntryPoint v0.7) and Kernel v3.1 accounts. A smart-account example is coming to this kit.</dd>
+              <dd>It isn&apos;t required for this challenge, and there&apos;s no officially supported bundler or paymaster. A normal wallet plus tUSD8 payments is enough. To spare users gas, use the gasless checkout in this kit (EIP-3009 with a relayer). For budgets, limits, expiry and revoke, write them into your own contract. You can deploy your own ERC-4337 setup if you want to, but the team won&apos;t support or debug it.</dd>
               <dt>Can I use Hardhat?</dt>
               <dd>Yes. Set <code>evmVersion: &quot;shanghai&quot;</code> in the Solidity settings, and <code>hardfork: &quot;shanghai&quot;</code> for the Hardhat network.</dd>
               <dt>My transaction fails with invalid opcode.</dt>
