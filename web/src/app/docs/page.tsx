@@ -95,7 +95,7 @@ export default function DocsPage() {
                   <tr><td><strong>Invoice Payments</strong></td><td>An order id is an invoice id. <code>Checkout.paymentOf(orderId)</code> tells you if it&apos;s paid; the <code>Paid</code> event is the receipt.</td></tr>
                   <tr><td><strong>Payroll and Vesting</strong></td><td>Reuse the tUSD8 setup, the chunked event reader and the relayer. Streaming and schedules are yours to build.</td></tr>
                   <tr><td><strong>Crowdfunding</strong></td><td>Pledges are payments to a campaign contract. Start from <code>Checkout.sol</code> and add goals, deadlines and refunds.</td></tr>
-                  <tr><td><strong>Confirmation of Payee</strong></td><td>Check who you&apos;re paying before you sign. Aevum testnet has an ERC-8004-style identity registry, <code className="wrap">0xF45E7f39Caba1d2055f613970575a7e7069636Be</code> (found on chain, not in QDay&apos;s docs yet).</td></tr>
+                  <tr><td><strong>Confirmation of Payee</strong></td><td>Check who you&apos;re paying before you sign. QDay&apos;s ERC-8004 registry is still in internal testing and isn&apos;t open for this challenge, so keep the name-to-address mapping in your own contract.</td></tr>
                   <tr><td><strong>Decentralized Payments</strong></td><td>Gasless checkout (EIP-3009 + relayer) works today. Account abstraction is on its way to this kit.</td></tr>
                   <tr><td><strong>Digital Ownership</strong></td><td>Pay in tUSD8, then mint or transfer the asset in the same contract call.</td></tr>
                   <tr><td><strong>Native AI Assistants</strong></td><td><code>examples/pay-gasless</code> shows a script that signs and pays without a browser, the starting point for an agent.</td></tr>
@@ -393,7 +393,7 @@ pnpm example read-payments    # every Paid event, 1,000 blocks at a time
             <p>What the challenge asks for:</p>
             <ul>
               <li><strong>Open-source code:</strong> a public GitHub repository with clean, readable code.</li>
-              <li><strong>Aevum integration:</strong> evidence that your app runs on QDay infrastructure, for example your contracts, ERC-8004 identities or QDay dapps.</li>
+              <li><strong>Aevum integration:</strong> evidence that your app runs on QDay infrastructure, for example your contracts or QDay dapps.</li>
               <li><strong>Live deployment:</strong> a working demo, a prototype interface, or a Docker image that runs the app.</li>
               <li><strong>Documentation:</strong> the problem you solve, your architecture, the core workflows, and the technologies you used.</li>
               <li><strong>Demo:</strong> the top 5 projects present a 3 to 5 minute live walkthrough on a video call.</li>
