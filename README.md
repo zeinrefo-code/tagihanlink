@@ -95,8 +95,11 @@ Deployed and exercised live on QDay Aevum testnet on 20 Nov 2026.
   — deploy tx
   [`0x1a05c44c…eea99c1`](https://explorer-test.qday.info/tx/0x1a05c44c727dd4d2718b7cbaf018e0f53ab9499dd91c0b709fc779c34eea99c1)
 - Token: tUSD8 `0x456569838f1d43009A91ebA4263147Afd7233483`
-- Deployed from commit: [`a3125327ca97fae02df7fa8bb63245c25fa3fed3`](https://github.com/zeinrefo-code/tagihanlink/commit/a3125327ca97fae02df7fa8bb63245c25fa3fed3)
-  ("TagihanLink phase 1: merchant-signed quote invoice payments")
+- Deployed from commit: [`cabc407246e2877dcb1e1b1a8b7a95e07bba562e`](https://github.com/zeinrefo-code/tagihanlink/commit/cabc407246e2877dcb1e1b1a8b7a95e07bba562e)
+  ("TagihanLink phase 1: merchant-signed quote invoice payments"; this is commit
+  `a3125327ca97fae02df7fa8bb63245c25fa3fed3` in the author's working repo — identical
+  tree; the public history omits only the starter kit's `.github/workflows/ci.yml`,
+  which the publishing token lacked the GitHub `workflow` scope to push)
 - Merchant / relayer (demo wallet): `0xb064e0f111d3F925104eF3BE4D49e89Fa7dbda33`
   (funded by the QDay Discord faucet:
   [tQDAY](https://explorer-test.qday.info/tx/0xac29fd9895e7dd163797bd0cec78906182ac1aa74a5a56402a7905fb284d4ed6),
