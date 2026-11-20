@@ -7,6 +7,7 @@
   "scripts": {
     "check-setup": "tsx --env-file-if-exists=.env src/check-setup.ts",
     "pay-gasless": "tsx --env-file-if-exists=.env src/pay-gasless.ts",
+    "pay-invoice": "tsx --env-file-if-exists=.env src/pay-invoice.ts",
     "read-payments": "tsx --env-file-if-exists=.env src/read-payments.ts",
     "typecheck": "tsc --noEmit"
   },

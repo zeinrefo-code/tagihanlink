@@ -26,6 +26,33 @@ export const eip3009Abi = parseAbi([
   "function receiveWithAuthorization(address from, address to, uint256 value, uint256 validAfter, uint256 validBefore, bytes32 nonce, uint8 v, bytes32 r, bytes32 s)",
 ]);
 
+/** ABI of contracts/src/TagihanLink.sol: invoice payments with merchant-signed quotes. */
+export const tagihanLinkAbi = parseAbi([
+  "function token() view returns (address)",
+  "function merchant() view returns (address)",
+  "function domainSeparator() view returns (bytes32)",
+  "function createInvoice(bytes32 orderId, uint256 amount, uint256 expiresAt, uint8 v, bytes32 r, bytes32 s)",
+  "function cancelInvoice(bytes32 orderId)",
+  "function pay(bytes32 orderId)",
+  "function payWithAuthorization(bytes32 orderId, address from, uint256 validAfter, uint256 validBefore, uint8 v, bytes32 r, bytes32 s)",
+  "function authorizationNonce(bytes32 orderId) view returns (bytes32)",
+  "function isPaid(bytes32 orderId) view returns (bool)",
+  "function statusOf(bytes32 orderId) view returns (uint8)",
+  "function invoiceOf(bytes32 orderId) view returns ((uint256 amount, uint64 expiresAt, uint8 status, address payer, uint64 paidAt))",
+  "event InvoiceCreated(bytes32 indexed orderId, address indexed merchant, uint256 amount, uint64 expiresAt)",
+  "event InvoiceCancelled(bytes32 indexed orderId)",
+  "event Paid(bytes32 indexed orderId, address indexed payer, uint256 amount)",
+  "error AlreadyPaid(bytes32 orderId)",
+  "error InvoiceAlreadyExists(bytes32 orderId)",
+  "error InvoiceNotOpen(bytes32 orderId)",
+  "error InvoiceExpired(bytes32 orderId)",
+  "error InvalidQuoteSignature()",
+  "error QuoteAlreadyExpired()",
+  "error NotMerchant()",
+  "error ZeroAmount()",
+  "error ZeroAddress()",
+]);
+
 /** ABI of contracts/src/Checkout.sol. */
 export const checkoutAbi = parseAbi([
   "function token() view returns (address)",
