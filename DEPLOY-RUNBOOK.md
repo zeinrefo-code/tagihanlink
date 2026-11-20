@@ -49,7 +49,7 @@ demo payments — simplest correct setup for a single-seller demo).
 
 ```bash
 cd ~/workspace/aevum-tagihanlink/contracts
-KEY=$(grep -i 'private key' ~/workspace/goals/aevum-builder-challenge-entry/hidden_files/build-wallet.txt | awk '{print $NF}')
+KEY=$(awk -F'\t' '{print $2}' ~/workspace/goals/aevum-builder-challenge-entry/hidden_files/build-wallet.txt)  # file format: address<TAB>key
 forge script script/DeployTagihanLink.s.sol \
   --rpc-url https://rpc-test.qday.info \
   --broadcast --legacy --private-key "$KEY"
@@ -71,9 +71,9 @@ Notes:
 ```bash
 cast wallet new > ~/workspace/goals/aevum-builder-challenge-entry/hidden_files/buyer-wallet.txt
 chmod 600 ~/workspace/goals/aevum-builder-challenge-entry/hidden_files/buyer-wallet.txt
-BUYER=$(grep -i 'address' ~/workspace/goals/aevum-builder-challenge-entry/hidden_files/buyer-wallet.txt | awk '{print $NF}')
+BUYER=$(awk -F'\t' '{print $1}' ~/workspace/goals/aevum-builder-challenge-entry/hidden_files/buyer-wallet.txt)  # file format: address<TAB>key
 # Send the buyer 2 tUSD8 from the build wallet (it holds the 5 tUSD8 faucet claim).
-KEY=$(grep -i 'private key' ~/workspace/goals/aevum-builder-challenge-entry/hidden_files/build-wallet.txt | awk '{print $NF}')
+KEY=$(awk -F'\t' '{print $2}' ~/workspace/goals/aevum-builder-challenge-entry/hidden_files/build-wallet.txt)  # file format: address<TAB>key
 cast send $TUSD8 "transfer(address,uint256)" $BUYER 2000000 \
   --rpc-url $RPC --legacy --private-key "$KEY"
 unset KEY

@@ -88,11 +88,39 @@ quote signed → invoice registered → gasless payment → status **PAID**.
 
 ## Aevum integration evidence
 
-<!-- PHASE 2: fill in after testnet deployment (see DEPLOY-RUNBOOK.md). -->
-- TagihanLink contract (chain 44005): _TBD — address + explorer link_
+Deployed and exercised live on QDay Aevum testnet on 20 Nov 2026.
+
+- **TagihanLink contract (chain 44005):**
+  [`0x886Cd3bbc06FE895Aaa25350cd58a1ac935850E4`](https://explorer-test.qday.info/address/0x886Cd3bbc06FE895Aaa25350cd58a1ac935850E4)
+  — deploy tx
+  [`0x1a05c44c…eea99c1`](https://explorer-test.qday.info/tx/0x1a05c44c727dd4d2718b7cbaf018e0f53ab9499dd91c0b709fc779c34eea99c1)
 - Token: tUSD8 `0x456569838f1d43009A91ebA4263147Afd7233483`
-- Deployed from commit: _TBD — commit link_
-- Sample transactions: _TBD — createInvoice tx, payWithAuthorization tx (explorer links)_
+- Deployed from commit: `a3125327ca97fae02df7fa8bb63245c25fa3fed3`
+  ("TagihanLink phase 1: merchant-signed quote invoice payments")
+- Merchant / relayer (demo wallet): `0xb064e0f111d3F925104eF3BE4D49e89Fa7dbda33`
+  (funded by the QDay Discord faucet:
+  [tQDAY](https://explorer-test.qday.info/tx/0xac29fd9895e7dd163797bd0cec78906182ac1aa74a5a56402a7905fb284d4ed6),
+  [tUSD8](https://explorer-test.qday.info/tx/0x40cf2253ca622629c1f7c3a192c71e9e5c3cf82d3e0bbdfc8f4def7c009e0fc9))
+- Demo buyer (fresh throwaway wallet): `0x57d47A14ea184a561658b7B8D3e5F33BFD1437C2`,
+  funded with 2 tUSD8 by the merchant —
+  [tx](https://explorer-test.qday.info/tx/0xb858a87d6208a4db1bb5260869e0a9b274c9e220eb0fbb4fa0f16a38ecd86514)
+
+**Live invoice flow** — order `0x6d896e383bba6912a1bfb34356a747f532daf0c68bb97fd104fa22f8a060c68c`,
+1 tUSD8:
+
+1. Merchant signed the quote off-chain (no transaction).
+2. `createInvoice` (relayer submitted) —
+   [tx](https://explorer-test.qday.info/tx/0x2505ff71e053635c0487df43a6c0911038e04e5623ee1fb6afb440403cd89e4d)
+3. `payWithAuthorization` (buyer's EIP-3009 signature, relayer paid the gas; the buyer
+   holds no tQDAY) —
+   [tx](https://explorer-test.qday.info/tx/0xb423b55056c28b1481a8eef94406de810cb78b0d4e02cbbc0b34045bc2b4673c)
+4. Readback: `invoiceOf` → amount 1 tUSD8, status **PAID**; `isPaid` → `true`;
+   merchant tUSD8 balance 3 → 4, buyer 2 → 1.
+
+**Live attack check:** a registration presenting the merchant's 1 tUSD8 quote with the
+amount tampered to 2 tUSD8 was broadcast on purpose — it reverted on-chain with
+`InvalidQuoteSignature` and no invoice was created —
+[tx](https://explorer-test.qday.info/tx/0x324e5fb519718a53eca75eefbbfa2df796351bd892a19a2d3dde7823a759e170)
 
 ## Tech
 
