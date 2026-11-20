@@ -95,7 +95,7 @@ Deployed and exercised live on QDay Aevum testnet on 20 Nov 2026.
   — deploy tx
   [`0x1a05c44c…eea99c1`](https://explorer-test.qday.info/tx/0x1a05c44c727dd4d2718b7cbaf018e0f53ab9499dd91c0b709fc779c34eea99c1)
 - Token: tUSD8 `0x456569838f1d43009A91ebA4263147Afd7233483`
-- Deployed from commit: `a3125327ca97fae02df7fa8bb63245c25fa3fed3`
+- Deployed from commit: [`a3125327ca97fae02df7fa8bb63245c25fa3fed3`](https://github.com/zeinrefo-code/tagihanlink/commit/a3125327ca97fae02df7fa8bb63245c25fa3fed3)
   ("TagihanLink phase 1: merchant-signed quote invoice payments")
 - Merchant / relayer (demo wallet): `0xb064e0f111d3F925104eF3BE4D49e89Fa7dbda33`
   (funded by the QDay Discord faucet:
